@@ -9,78 +9,8 @@ Version: 0.1
 
 define( 'MLF_VERSION', '0.1' );
 
-$plugin_folder = plugin_basename( dirname(__FILE__) );
-
-// automatically update .mo files
-$mlf_config['auto_update_mo'] = true;
-
-$mlf_config['basepath'] = WP_PLUGIN_DIR . '/' . $plugin_folder . '/';
-$mlf_config['baseurl']  = WP_CONTENT_URL . '/plugins/'. $plugin_folder .'/'; 
-$mlf_config['opt_prefix']  = 'mlf_'; 
-
-$mlf_config['locale']['de'] = "de_DE";
-$mlf_config['locale']['en'] = "en_US";
-$mlf_config['locale']['zh'] = "zh_CN";
-$mlf_config['locale']['fi'] = "fi";
-$mlf_config['locale']['fr'] = "fr_FR";
-$mlf_config['locale']['nl'] = "nl_NL";
-$mlf_config['locale']['se'] = "sv_SE";
-$mlf_config['locale']['it'] = "it_IT";
-$mlf_config['locale']['ro'] = "ro_RO";
-$mlf_config['locale']['hu'] = "hu_HU";
-$mlf_config['locale']['ja'] = "ja";
-$mlf_config['locale']['es'] = "es_ES";
-$mlf_config['locale']['vi'] = "vi";
-$mlf_config['locale']['ar'] = "ar";
-$mlf_config['locale']['pt'] = "pt_BR";
-
-// Names for languages in the corresponding language, add more if needed
-$mlf_config['language_name']['de'] = "Deutsch";
-$mlf_config['language_name']['en'] = "English";
-$mlf_config['language_name']['zh'] = "中文";
-$mlf_config['language_name']['fi'] = "suomi";
-$mlf_config['language_name']['fr'] = "Français";
-$mlf_config['language_name']['nl'] = "Nederlands";
-$mlf_config['language_name']['se'] = "Svenska";
-$mlf_config['language_name']['it'] = "Italiano";
-$mlf_config['language_name']['ro'] = "Română";
-$mlf_config['language_name']['hu'] = "Magyar";
-$mlf_config['language_name']['ja'] = "日本語";
-$mlf_config['language_name']['es'] = "Español";
-$mlf_config['language_name']['vi'] = "Tiếng Việt";
-$mlf_config['language_name']['ar'] = "العربية";
-$mlf_config['language_name']['pt'] = "Português";
-
-
-// Flag images configuration
-// Look in /flags/ directory for a huge list of flags for usage
-$mlf_config['flag']['en'] = 'gb.png';
-$mlf_config['flag']['de'] = 'de.png';
-$mlf_config['flag']['zh'] = 'cn.png';
-$mlf_config['flag']['fi'] = 'fi.png';
-$mlf_config['flag']['fr'] = 'fr.png';
-$mlf_config['flag']['nl'] = 'nl.png';
-$mlf_config['flag']['se'] = 'se.png';
-$mlf_config['flag']['it'] = 'it.png';
-$mlf_config['flag']['ro'] = 'ro.png';
-$mlf_config['flag']['hu'] = 'hu.png';
-$mlf_config['flag']['ja'] = 'jp.png';
-$mlf_config['flag']['es'] = 'es.png';
-$mlf_config['flag']['vi'] = 'vn.png';
-$mlf_config['flag']['ar'] = 'arle.png';
-$mlf_config['flag']['pt'] = 'br.png';
-
-// Location of flags (needs trailing slash!)
-$mlf_config['flag_location'] =  "/flags/";
-
-// enable the use of following languages (order=>language)
-$mlf_config['enabled_languages'] = array(
-    '0' => 'pt',
-    '1' => 'es', 
-    '2' => 'en'
-);
-
 // Load multi language framework files
+require_once(dirname(__FILE__) . "/config.php");
 require_once(dirname(__FILE__) . "/core-functions.php");
 require_once(dirname(__FILE__) . "/utils.php");
 //require_once(dirname(__FILE__) . "/edit_screen.php");
@@ -88,8 +18,26 @@ require_once(dirname(__FILE__) . "/utils.php");
 
 function mlf_init() {
     global $mlf_config;
-
-/*       
+    
+    // extract url information
+    $mlf_config['url_info'] = mlf_extractURL($_SERVER['REQUEST_URI'], $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
+    
+    // check cookies for admin
+    if(defined('WP_ADMIN')) {
+        if(isset($_GET['lang']) && mlf_isEnabled($_GET['lang'])) {
+            $mlf_config['language'] = $mlf_config['url_info']['language'];
+            setcookie('mlf_admin_language', $mlf_config['language'], time()+60*60*24*30);
+        } elseif(isset($_COOKIE['mlf_admin_language']) && mlf_isEnabled($_COOKIE['mlf_admin_language'])) {
+            $mlf_config['language'] = $_COOKIE['mlf_admin_language'];
+        } else {
+            $mlf_config['language'] = $mlf_config['default_language'];
+        }
+    } else {
+        $mlf_config['language'] = $mlf_config['url_info']['language'];
+    }
+    
+    
+/*
     // load plugin translations
     load_plugin_textdomain('mlf', false, dirname(__FILE__ ) . '/lang');
 
@@ -156,6 +104,8 @@ register_deactivation_hook(__FILE__, 'mlf_deactivate');
 add_action('wp_head',       'mlf_header');
 
 add_action('admin_menu',    'mlf_admin_menu');
-add_action('init', 'mlf_init');
+add_filter('locale',        'mlf_localeForCurrentLanguage',99);
+
+add_action('plugins_loaded','mlf_init');
 
 ?>
