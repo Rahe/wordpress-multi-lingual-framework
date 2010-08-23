@@ -11,6 +11,7 @@ define( 'MLF_VERSION', '0.1' );
 
 // Load multi language framework files
 require_once(dirname(__FILE__) . "/config.php");
+require_once(dirname(__FILE__) . "/settings.php");
 require_once(dirname(__FILE__) . "/core-functions.php");
 require_once(dirname(__FILE__) . "/utils.php");
 //require_once(dirname(__FILE__) . "/edit_screen.php");
@@ -36,15 +37,13 @@ function mlf_init() {
         $mlf_config['language'] = $mlf_config['url_info']['language'];
     }
     
-    
-/*
     // load plugin translations
     load_plugin_textdomain('mlf', false, dirname(__FILE__ ) . '/lang');
 
     // update Gettext Databases if on Backend
-    if(defined('WP_ADMIN') && $mlf_config['auto_update_mo'])
-        mlf_updateGettextDatabases(true);    
-*/
+    if(defined('WP_ADMIN') && $mlf_config['auto_update_mo']){
+        mlf_updateGettextDatabases();    
+    }    
 }
 
 function mlf_activate() {
@@ -63,8 +62,7 @@ function mlf_deactivate() {
 function mlf_admin_menu() {
     global $mlf_config;
     
-    add_submenu_page( 'plugins.php','Multi Language Framework Configuration',
-                    'Multi Language Framework Configuration', 'manage_options', 'mlf', 
+    add_submenu_page( 'options-general.php','Multi Language', 'Multi Language', 'manage_options', 'mlf', 
                     'mlf_page_admin');
                 
     // generate menu with flags for every enabled language
@@ -81,21 +79,6 @@ function mlf_admin_menu() {
     }
 }
 
-function mlf_page_admin()
-{
-     ?>
-     <div class="wrap">
-           <h2>Multi Language Framework Configuration</h2>
-           <p>On this page, you will configure all the aspects of this plugins.</p>
-           <form action="" method="post" id="multi-language-framework-form">
-                <h3><label for="copyright_text">Default language:</label></h3>
-                <p><input type="text" name="default_lang" id="default_lang" value="<?php echo esc_attr( get_option('mlf_default_lang') )?> " /></p>
-                <p class="submit"><input type="submit" name="submit"   value="Update options &raquo;" /></p>
-                <?php wp_nonce_field('multi_language_admin_options-update'); ?>
-           </form>
-     </div>
-     <?php
-}
    
 register_activation_hook(__FILE__, 'mlf_activate');
 register_deactivation_hook(__FILE__, 'mlf_deactivate');
