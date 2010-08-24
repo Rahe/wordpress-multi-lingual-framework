@@ -14,7 +14,7 @@ require_once(dirname(__FILE__) . "/config.php");
 require_once(dirname(__FILE__) . "/settings.php");
 require_once(dirname(__FILE__) . "/core-functions.php");
 require_once(dirname(__FILE__) . "/utils.php");
-//require_once(dirname(__FILE__) . "/edit_screen.php");
+require_once(dirname(__FILE__) . "/edit_screen.php");
 
 
 function mlf_init() {
@@ -84,8 +84,6 @@ register_activation_hook(__FILE__, 'mlf_activate');
 register_deactivation_hook(__FILE__, 'mlf_deactivate');
 
 // Hooks (Actions)
-add_action('wp_head',       'mlf_header');
-
 add_action('admin_menu',    'mlf_admin_menu');
 add_filter('locale',        'mlf_localeForCurrentLanguage',99);
 
