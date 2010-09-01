@@ -1,0 +1,121 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Multi Language Framework\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/multi-language-framework\n"
+"POT-Creation-Date: 2010-08-30 15:33-0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Vinicius de Andrade <vinicius.andrade@bireme.org>\n"
+"Language-Team: BIREME, HackLab\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Portuguese\n"
+"X-Poedit-Country: BRAZIL\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: edit_screen.php:37
+msgctxt "post type general name"
+msgid "Post Translations"
+msgstr "Traduções deste Post"
+
+#: edit_screen.php:38
+msgctxt "post type singular name"
+msgid "Post Translation"
+msgstr "Tradução do Post"
+
+#: edit_screen.php:39
+#: edit_screen.php:64
+msgctxt "book"
+msgid "Add New"
+msgstr "Adicionar Novo"
+
+#: edit_screen.php:40
+#: edit_screen.php:65
+msgid "Add New Translation"
+msgstr "Adicionar Nova Tradução"
+
+#: edit_screen.php:41
+#: edit_screen.php:66
+msgid "Edit Translation"
+msgstr "Editar Tradução"
+
+#: edit_screen.php:42
+#: edit_screen.php:67
+msgid "New Translation"
+msgstr "Nova Tradução"
+
+#: edit_screen.php:43
+#: edit_screen.php:68
+msgid "View Translation"
+msgstr "Ver Tradução"
+
+#: edit_screen.php:44
+#: edit_screen.php:69
+msgid "Search Translations"
+msgstr "Pesquisar traduções"
+
+#: edit_screen.php:45
+#: edit_screen.php:70
+msgid "No translations found"
+msgstr "Nenhuma tradução encontrada"
+
+#: edit_screen.php:46
+#: edit_screen.php:71
+msgid "No translations found in Trash"
+msgstr "Nenhuma tradução encontrada na Lixeira"
+
+#: edit_screen.php:62
+msgctxt "post type general name"
+msgid "Posts - "
+msgstr ""
+
+#: edit_screen.php:63
+msgctxt "post type singular name"
+msgid "Post - "
+msgstr ""
+
+#: edit_screen.php:103
+msgid "Translations"
+msgstr "Traduções"
+
+#: edit_screen.php:146
+#: edit_screen.php:149
+msgid "Post Translations"
+msgstr "Traduções do Post"
+
+#: edit_screen.php:170
+msgid "Save this post so you can add and edit translations"
+msgstr "Salve este post para adicionar e editar traduções"
+
+#: multi-language-framework.php:65
+msgid "Multi Language Settings"
+msgstr "Ajustes Multi Language"
+
+#: settings.php:7
+msgid "Multi Language Framework Configuration"
+msgstr "Configuração Multi Language Framework"
+
+#: settings.php:8
+msgid "On this page, you will configure all the aspects of this plugins"
+msgstr "Nesta página você pode configurar todos os parâmetros relativos ao plugin"
+
+#: settings.php:10
+msgid "Default language:"
+msgstr "Idioma padrão:"
+
+#. Plugin Name of the plugin/theme
+msgid "Multi Language Framework"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://reddes.bvsalud.org/projects/multi-language-framework/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Handles creation of multilingual content."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "BIREME, LeoGermani"
+msgstr ""
+

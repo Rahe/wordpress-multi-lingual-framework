@@ -31,12 +31,12 @@ add_action('init', 'post_translations_init');
 // Creates a post type for each language
 function post_translations_init() {
 
-    global $langs; 
+    global $langs, $mlf_config; 
 
     $labels = array(
         'name' => _x('Post Translations', 'post type general name'),
         'singular_name' => _x('Post Translation', 'post type singular name'),
-        'add_new' => _x('Add New', 'book'),
+        'add_new' => _x('Add New','mlf'),
         'add_new_item' => __('Add New Translation'),
         'edit_item' => __('Edit Translation'),
         'new_item' => __('New Translation'),
@@ -59,16 +59,16 @@ function post_translations_init() {
     foreach ($langs as $l) {
         
         $labels = array(
-            'name' => _x('Posts - ' . $l, 'post type general name'),
+            'name' => _x('Posts - ' . $mlf_config['language_name'][$l], 'post type general name'),
             'singular_name' => _x('Post - ' . $l, 'post type singular name'),
-            'add_new' => _x('Add New', 'book'),
-            'add_new_item' => __('Add New Translation'),
-            'edit_item' => __('Edit Translation'),
-            'new_item' => __('New Translation'),
-            'view_item' => __('View Translation'),
-            'search_items' => __('Search Translations'),
-            'not_found' =>  __('No translations found'),
-            'not_found_in_trash' => __('No translations found in Trash'), 
+            'add_new' => __('Add New', 'mlf'),
+            'add_new_item' => __('Add New Translation', 'mlf'),
+            'edit_item' => __('Edit Translation','mlf'),
+            'new_item' => __('New Translation', 'mlf'),
+            'view_item' => __('View Translation', 'mlf'),
+            'search_items' => __('Search Translations', 'mlf'),
+            'not_found' =>  __('No translations found', 'mlf'),
+            'not_found_in_trash' => __('No translations found in Trash', 'mlf'), 
             'parent_item_colon' => ''
         );
         $args = array(
@@ -100,23 +100,24 @@ function _post_translations_add_column($defaults) {
     foreach($defaults as $k=>$v){
         $new_columns[$k] = $v;
         if($k=='title')
-            $new_columns['post_translations'] = __('Translations');
+            $new_columns['post_translations'] = __('Translations', 'mlf');
     }
     return $new_columns;
 
 }
 
 function post_translations_add_column($column_name, $id) {
-
+    
     if ($column_name=="post_translations") {
-        global $langs, $wpdb, $defaultLanguage;
+        global $langs, $wpdb, $defaultLanguage, $mlf_config;
         
         $post_type = get_query_var('post_type');
         
         foreach ($langs as $lang) {
             
             $translation_id = false;
-            $p_type = 'post_translations_' . $lang;
+            $p_type = 'post_translations_' . $lang;            
+            $flag_img = $mlf_config['baseurl'] . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
             
             if ($post_type != 'post') {
                 // instead of checking for the current language, lets check for the default language
@@ -129,9 +130,9 @@ function post_translations_add_column($column_name, $id) {
             #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ";
             
             if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ")) {                
-                echo "<a href='post.php?action=edit&post=$translation_id'>edit $lang</a> ";
+                echo "<a href='post.php?action=edit&post=$translation_id'>edit <img src='$flag_img'/></a> ";
             } else {
-                echo "<a href='post-new.php?post_type=$p_type&translation_of=$id'>add $lang</a> ";
+                echo "<a href='post-new.php?post_type=$p_type&translation_of=$id'>add <img src='$flag_img'/></a> ";
             }
         }
     }
@@ -143,10 +144,10 @@ add_action('save_post', 'post_translation_save');
 function post_translation_box() {
     global $langs;
     
-    add_meta_box( 'post_translations',__('Post Translations'),'post_translation_inner_box', 'post', 'side' );
+    add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', 'post', 'side' );
     
     foreach ($langs as $lang) {
-        add_meta_box( 'post_translations',__('Post Translations'),'post_translation_inner_box', 'post_translations_' . $lang, 'side' );
+        add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', 'post_translations_' . $lang, 'side' );
     }
 }
    
@@ -163,11 +164,11 @@ function post_translation_inner_box() {
         echo '<input type="hidden" name="_translation_of" value="' . $_GET['translation_of'] . '" >';
     }
     
-    global $langs, $wpdb, $defaultLanguage;
+    global $langs, $wpdb, $defaultLanguage, $mlf_config;
 
     #só aparecer links pra criar ou editar traduções quando estiver editando posts
     if ($_GET['action'] != 'edit') {
-        _e('Save this post so you can add and edit translations');
+        _e('Save this post so you can add and edit translations', 'mlf');
         return;
     }
     
@@ -177,6 +178,7 @@ function post_translation_inner_box() {
         
         $translation_id = false;
         $p_type = 'post_translations_' . $lang;
+        $flag_img = $mlf_config['baseurl'] . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
         
         if ($post_type != 'post') {
             // instead of checking for the current language, lets check for the default language
@@ -189,9 +191,9 @@ function post_translation_inner_box() {
         #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ";
         
         if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ")) {
-            echo "<a href='post.php?action=edit&post=$translation_id'>edit $lang</a> ";        
+            echo "<a href='post.php?action=edit&post=$translation_id'>edit <img src='$flag_img'/></a> ";        
         } else {
-            echo "<a href='post-new.php?post_type=post_translations_$lang&translation_of={$post->ID}'>add $lang</a> ";
+            echo "<a href='post-new.php?post_type=post_translations_$lang&translation_of={$post->ID}'>add <img src='$flag_img'/></a> ";
         }   
     }
 }

@@ -38,7 +38,7 @@ function mlf_init() {
     }
     
     // load plugin translations
-    load_plugin_textdomain('mlf', false, dirname(__FILE__ ) . '/lang');
+    load_plugin_textdomain('mlf', false, dirname(plugin_basename( __FILE__ )).'/languages');
 
     // update Gettext Databases if on Backend
     if(defined('WP_ADMIN') && $mlf_config['auto_update_mo']){
@@ -62,7 +62,7 @@ function mlf_deactivate() {
 function mlf_admin_menu() {
     global $mlf_config;
     
-    add_submenu_page( 'options-general.php','Multi Language', 'Multi Language', 'manage_options', 'mlf', 
+    add_submenu_page( 'options-general.php', __('Multi Language Settings', 'mlf'), 'Multi Language', 'manage_options', 'mlf', 
                     'mlf_page_admin');
                 
     // generate menu with flags for every enabled language
