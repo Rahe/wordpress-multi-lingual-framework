@@ -1,7 +1,5 @@
 <?php
 
-$plugin_folder = plugin_basename( dirname(__FILE__) );
-
 // automatically update .mo files
 $mlf_config['auto_update_mo'] = true;
 

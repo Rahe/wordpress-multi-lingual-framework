@@ -1,0 +1,123 @@
+.mlf_wrap{
+    width:740px;
+}
+
+.mlf_section{
+    border:1px solid #ddd;
+    border-bottom:0;
+    background:#f9f9f9;
+}
+
+.mlf_opts label{
+    font-size:12px;
+    font-weight:700;
+    width:200px;
+    display:block;
+    float:left; 
+}
+.mlf_input {
+    padding:30px 10px;
+    border-bottom:1px solid #ddd;
+    border-top:1px solid #fff;
+}
+.mlf_opts small{
+    display:block;
+    float:right;
+    width:200px;
+    color:#999;
+}
+.mlf_opts input[type="text"], .mlf_opts select{
+    width:280px;
+    font-size:12px;
+    padding:4px;
+    color:#333;
+    line-height:1em;
+    background:#f3f3f3;
+}
+.mlf_input input:focus, .mlf_input textarea:focus{
+        background:#fff;
+}
+.mlf_input textarea{
+    width:280px;
+    height:175px;
+    font-size:12px;
+    padding:4px;
+    color:#333;
+    line-height:1.5em;
+    background:#f3f3f3;
+}
+.mlf_title h3 {
+    cursor:pointer;
+    font-size:1em;
+    text-transform: uppercase;
+    margin:0;
+    font-weight:bold;
+    color:#232323;
+    float:left;
+    width:80%;
+    padding:14px 4px;
+}
+
+.mlf_title{
+    cursor:pointer;
+    border-bottom:1px solid #ddd;
+    background:#eee;
+    padding:0;
+    }
+
+.mlf_title h3 img.inactive{
+    margin:-8px 10px 0 2px;
+    width:32px;
+    height:32px;    
+    background:url('../images/pointer.png') no-repeat 0 0;
+    float:left;
+    -moz-border-radius:6px;
+    border:1px solid #ccc;
+}
+
+.mlf_title h3 img.active{
+    margin:-8px 10px 0 2px;
+    width:32px;
+    height:32px;    
+    background:url('../images/pointer.png') no-repeat  0 -32px;
+    float:left;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border:1px solid #ccc;
+}
+        
+.mlf_title h3:hover img{
+    border:1px solid #999;
+}
+
+.mlf_title span.submit{
+    display:block;
+    float:right;
+    margin:0;
+    padding:0;
+    width:15%;
+    padding:14px 0;
+}
+
+.clearfix{
+    clear:both;
+}
+
+.mlf_table th, .mlf_table td{
+    border:1px solid #bbb;
+    padding:10px;
+    text-align:center;
+}
+
+.mlf_table th, .mlf_table td.feature{
+    border-color:#888;
+    }
+
+.mlf_opts ul{
+    float: left;
+    display: block;
+}
+
+.mlf_input label{
+    
+}

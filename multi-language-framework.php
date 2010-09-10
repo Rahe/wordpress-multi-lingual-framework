@@ -9,6 +9,11 @@ Version: 0.1
 
 define( 'MLF_VERSION', '0.1' );
 
+$plugin_folder  = plugin_basename( dirname(__FILE__) );
+$plugin_url     = WP_CONTENT_URL . '/plugins/'. $plugin_folder .'/'; 
+$plugin_prefix  = 'mlf_'; 
+$plugin_name    = 'Multi Language Framework';
+
 // Load multi language framework files
 require_once(dirname(__FILE__) . "/config.php");
 require_once(dirname(__FILE__) . "/settings.php");
@@ -39,7 +44,13 @@ function mlf_init() {
     
     // load plugin translations
     load_plugin_textdomain('mlf', false, dirname(plugin_basename( __FILE__ )).'/languages');
-
+    
+    // register plugin javascript files
+    mlf_add_js();
+    
+    // register plugin css files
+    mlf_add_css();
+    
     // update Gettext Databases if on Backend
     if(defined('WP_ADMIN') && $mlf_config['auto_update_mo']){
         mlf_updateGettextDatabases();    
@@ -53,9 +64,9 @@ function mlf_activate() {
 
         
 function mlf_deactivate() {
-    global $wpdb;
+    global $wpdb, $plugin_prefix;
     
-    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE 'mlf_%'");
+    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$plugin_prefix}%'");
 }
     
     
@@ -77,8 +88,33 @@ function mlf_admin_menu() {
         }
         add_menu_page(__($mlf_config['language_name'][$language], 'mlf'), __($mlf_config['language_name'][$language], 'mlf'), 'read', $link, NULL, $mlf_config['baseurl'] . $mlf_config['flag_location'] . $mlf_config['flag'][$language]);
     }
+    
+    //call register settings function
+    add_action( 'admin_init', 'mlf_register_settings' );
 }
 
+function mlf_add_js() {
+    global $plugin_url;
+    
+    wp_enqueue_script('mlf-admin', $plugin_url . 'js/settings.js');    
+}
+        
+function mlf_add_css() {
+    global $plugin_url;
+   
+    wp_enqueue_style('mlf-admin', $plugin_url . 'css/settings.css');
+}
+
+function mlf_register_settings(){
+    global $plugin_prefix;
+    
+     $options = array ('default_language', 'enabled_languages', 'url_mode');
+    
+    foreach($options as $option) {    
+        register_setting('multi-language-settings-group', $plugin_prefix . $option);
+    }
+
+}    
    
 register_activation_hook(__FILE__, 'mlf_activate');
 register_deactivation_hook(__FILE__, 'mlf_deactivate');
