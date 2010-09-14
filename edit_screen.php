@@ -30,8 +30,9 @@ add_action('init', 'post_translations_init');
 
 // Creates a post type for each language
 function post_translations_init() {
-
-    global $langs, $mlf_config; 
+    global $langs;
+   
+    $language_name = mlf_get_option('language_name');
 
     $labels = array(
         'name' => _x('Post Translations', 'post type general name'),
@@ -59,7 +60,7 @@ function post_translations_init() {
     foreach ($langs as $l) {
         
         $labels = array(
-            'name' => _x('Posts - ' . $mlf_config['language_name'][$l], 'post type general name'),
+            'name' => _x('Posts - ' . $language_name[$l], 'post type general name'),
             'singular_name' => _x('Post - ' . $l, 'post type singular name'),
             'add_new' => __('Add New', 'mlf'),
             'add_new_item' => __('Add New Translation', 'mlf'),
@@ -109,15 +110,17 @@ function _post_translations_add_column($defaults) {
 function post_translations_add_column($column_name, $id) {
     
     if ($column_name=="post_translations") {
-        global $langs, $wpdb, $defaultLanguage, $mlf_config;
+        global $langs, $wpdb, $defaultLanguage, $plugin_url;
         
+        $flag_location = mlf_get_option('flag_location');
         $post_type = get_query_var('post_type');
+        $flag = mlf_get_option('flag');
         
         foreach ($langs as $lang) {
             
             $translation_id = false;
             $p_type = 'post_translations_' . $lang;            
-            $flag_img = $mlf_config['baseurl'] . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
+            $flag_img = $plugin_url . $flag_location . $flag[$lang];
             
             if ($post_type != 'post') {
                 // instead of checking for the current language, lets check for the default language
@@ -164,7 +167,8 @@ function post_translation_inner_box() {
         echo '<input type="hidden" name="_translation_of" value="' . $_GET['translation_of'] . '" >';
     }
     
-    global $langs, $wpdb, $defaultLanguage, $mlf_config;
+    global $langs, $wpdb, $defaultLanguage, $plugin_url;
+    
 
     #só aparecer links pra criar ou editar traduções quando estiver editando posts
     if ($_GET['action'] != 'edit') {
@@ -173,12 +177,14 @@ function post_translation_inner_box() {
     }
     
     $post_type = $post->post_type;
+    $flag_location = mlf_get_option('flag_location');
+    $flag = mlf_get_option('flag');   
     
     foreach ($langs as $lang) {
         
         $translation_id = false;
         $p_type = 'post_translations_' . $lang;
-        $flag_img = $mlf_config['baseurl'] . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
+        $flag_img = $plugin_url . $flag_location . $flag[$lang];
         
         if ($post_type != 'post') {
             // instead of checking for the current language, lets check for the default language
@@ -213,8 +219,8 @@ function post_translation_save( $post_id ) {
             return $post_id;
     }
 
-	add_post_meta($post_id, '_translation_of', $_POST['_translation_of']);
+    add_post_meta($post_id, '_translation_of', $_POST['_translation_of']);
     add_post_meta($_POST['_translation_of'], '_translation_of', $post_id);
-	
+    
     return $post_id;
 }

@@ -1,21 +1,21 @@
 <?php 
 
 function mlf_updateGettextDatabases($force = false, $only_for_language = '') {
-    global $mlf_config;
 
     if(!is_dir(WP_LANG_DIR)) {
         if(!@mkdir(WP_LANG_DIR)){                    
             return false;
         }
     }
-    $next_update = get_option('mlf_next_update_mo');
+    $next_update = mlf_get_option('next_update_mo');
+    $locale_list = mlf_get_option('locale');
   
     if(time() < $next_update && !$force) 
         return true;
         
     update_option('mlf_next_update_mo', time() + 7*24*60*60);
     
-    foreach($mlf_config['locale'] as $lang => $locale) {
+    foreach($locale_list as $lang => $locale) {
         
         if(mlf_isEnabled($only_for_language) && $lang != $only_for_language) continue;
         
@@ -59,13 +59,17 @@ function mlf_updateGettextDatabases($force = false, $only_for_language = '') {
 
 // returns cleaned string and language information
 function mlf_extractURL($url, $host = '', $referer = '') {
-    global $mlf_config;
+    
+    $default_language = mlf_get_option('default_language');
+    $url_mode = mlf_get_option('url_mode');
+    $hide_default_language  = mlf_get_option('hide_default_language');
+    
     $home = mlf_parseURL(get_option('home'));
     $home['path'] = trailingslashit($home['path']);
     $referer = mlf_parseURL($referer);
     
     $result = array();
-    $result['language'] = $mlf_config['default_language'];
+    $result['language'] = $default_language;
     $result['url'] = $url;
     $result['original_url'] = $url;
     $result['host'] = $host;
@@ -73,8 +77,8 @@ function mlf_extractURL($url, $host = '', $referer = '') {
     $result['internal_referer'] = false;
     $result['home'] = $home['path'];
     
-    switch($mlf_config['url_mode']) {
-        case QT_URL_PATH:
+    switch($url_mode) {
+        case "path":
             // pre url
             $url = substr($url, strlen($home['path']));
             if($url) {
@@ -88,7 +92,7 @@ function mlf_extractURL($url, $host = '', $referer = '') {
                 }
             }
             break;
-        case QT_URL_DOMAIN:
+        case "domain":
             // pre domain
             if($host) {
                 if(preg_match("#^([a-z]{2}).#i",$host,$match)) {
@@ -114,7 +118,7 @@ function mlf_extractURL($url, $host = '', $referer = '') {
         $result['url'] = preg_replace("#(&|\?)lang=".$result['language']."&?#i","$1",$result['url']);
         $result['url'] = preg_replace("#[\?\&]+$#i","",$result['url']);
     } elseif($home['host'] == $result['host'] && $home['path'] == $result['url']) {
-        if(empty($referer['host'])||!$mlf_config['hide_default_language']) {
+        if(empty($referer['host']) || !$hide_default_language) {
             $result['redirect'] = true;
         } else {
             // check if activating language detection is possible
@@ -137,20 +141,24 @@ function mlf_extractURL($url, $host = '', $referer = '') {
 
 
 function mlf_localeForCurrentLanguage($locale){
-    global $mlf_config;
+    global $admin_language;
+ 
+    $locale_list = mlf_get_option('locale');
+    $windows_locale_list = mlf_get_option('windows_locale');
+    
     // try to figure out the correct locale
     $locale = array();
-    $locale[] = $mlf_config['locale'][$mlf_config['language']].".utf8";
-    $locale[] = $mlf_config['locale'][$mlf_config['language']]."@euro";
-    $locale[] = $mlf_config['locale'][$mlf_config['language']];
-    $locale[] = $mlf_config['windows_locale'][$mlf_config['language']];
-    $locale[] = $mlf_config['language'];
-    
+    $locale[] = $locale_list[$admin_language].".utf8";
+    $locale[] = $locale_list[$admin_language]."@euro";
+    $locale[] = $locale_list[$admin_language];
+    $locale[] = $windows_locale_list[$admin_language];
+    $locale[] = $admin_language;
+  
     // return the correct locale and most importantly set it (wordpress doesn't, which is bad)
     // only set LC_TIME as everyhing else doesn't seem to work with windows
     setlocale(LC_TIME, $locale);
     
-    return $mlf_config['locale'][$mlf_config['language']];
+    return $locale_list[$admin_language];
 }
 
 

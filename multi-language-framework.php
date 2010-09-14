@@ -13,6 +13,7 @@ $plugin_folder  = plugin_basename( dirname(__FILE__) );
 $plugin_url     = WP_CONTENT_URL . '/plugins/'. $plugin_folder .'/'; 
 $plugin_prefix  = 'mlf_'; 
 $plugin_name    = 'Multi Language Framework';
+$admin_language = '';
 
 // Load multi language framework files
 require_once(dirname(__FILE__) . "/config.php");
@@ -23,23 +24,25 @@ require_once(dirname(__FILE__) . "/edit_screen.php");
 
 
 function mlf_init() {
-    global $mlf_config;
+    global $admin_language;
     
     // extract url information
-    $mlf_config['url_info'] = mlf_extractURL($_SERVER['REQUEST_URI'], $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
+    $url_info = mlf_extractURL($_SERVER['REQUEST_URI'], $_SERVER["HTTP_HOST"], isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
+    $default_language = mlf_get_option('default_language');
+    $auto_update_mo = mlf_get_option('auto_update_mo');
     
     // check cookies for admin
     if(defined('WP_ADMIN')) {
         if(isset($_GET['lang']) && mlf_isEnabled($_GET['lang'])) {
-            $mlf_config['language'] = $mlf_config['url_info']['language'];
-            setcookie('mlf_admin_language', $mlf_config['language'], time()+60*60*24*30);
+            $admin_language  = $url_info['language'];
+            setcookie('mlf_admin_language', $admin_language, time()+60*60*24*30);
         } elseif(isset($_COOKIE['mlf_admin_language']) && mlf_isEnabled($_COOKIE['mlf_admin_language'])) {
-            $mlf_config['language'] = $_COOKIE['mlf_admin_language'];
+            $admin_language = $_COOKIE['mlf_admin_language'];
         } else {
-            $mlf_config['language'] = $mlf_config['default_language'];
+            $admin_language = $default_language;
         }
     } else {
-        $mlf_config['language'] = $mlf_config['url_info']['language'];
+        $admin_language = $url_info['language'];
     }
     
     // load plugin translations
@@ -52,14 +55,18 @@ function mlf_init() {
     mlf_add_css();
     
     // update Gettext Databases if on Backend
-    if(defined('WP_ADMIN') && $mlf_config['auto_update_mo']){
+    if(defined('WP_ADMIN') && $auto_update_mo){
         mlf_updateGettextDatabases();    
-    }    
+    }
 }
 
 function mlf_activate() {
     $admin = get_role('administrator');   
     $admin->add_cap('manage-multi-language-framework');
+    
+    // register on options database plugin default settings 
+    create_default_settings();
+
 }
 
         
@@ -71,13 +78,18 @@ function mlf_deactivate() {
     
     
 function mlf_admin_menu() {
-    global $mlf_config;
+    global $plugin_url;
     
+    $language_name = mlf_get_option('language_name');
+    $enabled_languages = mlf_get_option('enabled_languages');
+    $flag = mlf_get_option('flag');
+    $flag_location = mlf_get_option('flag_location');
+ 
     add_submenu_page( 'options-general.php', __('Multi Language Settings', 'mlf'), 'Multi Language', 'manage_options', 'mlf', 
                     'mlf_page_admin');
                 
     // generate menu with flags for every enabled language
-    foreach($mlf_config['enabled_languages'] as $id => $language) {
+    foreach( $enabled_languages as $id => $language) {
         $link = add_query_arg('lang', $language);
         $link = (strpos($link, "wp-admin/") === false) ? preg_replace('#[^?&]*/#i', '', $link) : preg_replace('#[^?&]*wp-admin/#i', '', $link);
         if(strpos($link, "?")===0||strpos($link, "index.php?")===0) {
@@ -86,7 +98,7 @@ function mlf_admin_menu() {
             else
                 $link = 'edit.php?lang='.$language;
         }
-        add_menu_page(__($mlf_config['language_name'][$language], 'mlf'), __($mlf_config['language_name'][$language], 'mlf'), 'read', $link, NULL, $mlf_config['baseurl'] . $mlf_config['flag_location'] . $mlf_config['flag'][$language]);
+        add_menu_page(__($language_name[$language], 'mlf'), __($language_name[$language], 'mlf'), 'read', $link, NULL, $plugin_url . $flag_location . $flag[$language]);
     }
     
     //call register settings function
@@ -102,19 +114,25 @@ function mlf_add_js() {
 function mlf_add_css() {
     global $plugin_url;
    
-    wp_enqueue_style('mlf-admin', $plugin_url . 'css/settings.css');
+    wp_enqueue_style('mlf-admin', $plugin_url . 'css/style.css');
 }
 
 function mlf_register_settings(){
     global $plugin_prefix;
     
-     $options = array ('default_language', 'enabled_languages', 'url_mode');
+     $options = array ('default_language', 'url_mode');
     
     foreach($options as $option) {    
         register_setting('multi-language-settings-group', $plugin_prefix . $option);
     }
 
 }    
+   
+function mlf_get_option($option_name) {
+    global $plugin_prefix;
+    
+    return get_option($plugin_prefix . $option_name);
+}   
    
 register_activation_hook(__FILE__, 'mlf_activate');
 register_deactivation_hook(__FILE__, 'mlf_deactivate');

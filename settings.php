@@ -16,7 +16,7 @@ function mlf_page_admin() {
             "desc" => "Select the site default language",
             "id" => $plugin_prefix."default_language",
             "type" => "select",
-            "options" => array("pt", "es", "en"),
+            "options" => mlf_get_option('enabled_languages'),
             "std" => "blue"),
             
         array( "type" => "close"),
@@ -69,7 +69,7 @@ function mlf_page_admin() {
             <?php 
                 break; 
                 
-                case 'text':
+                case "text":
             ?>
 
             <div class="mlf_input mlf_text">
@@ -83,7 +83,7 @@ function mlf_page_admin() {
             <?php 
                 break;
              
-                case 'textarea':
+                case "textarea":
             ?>
 
             <div class="mlf_input mlf_textarea">
@@ -96,7 +96,7 @@ function mlf_page_admin() {
             <?php
                 break;
              
-                case 'select':
+                case "select":
             ?>
 
             <div class="mlf_input mlf_select">

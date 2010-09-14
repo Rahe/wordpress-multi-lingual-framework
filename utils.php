@@ -1,8 +1,10 @@
 <?php
 
 function mlf_isEnabled($lang) {
-    global $mlf_config;
-    return in_array($lang, $mlf_config['enabled_languages']);
+    
+    $enabled_languages = mlf_get_option('enabled_languages');
+    
+    return in_array($lang, $enabled_languages);
 }
 
 function mlf_parseURL($url) {
