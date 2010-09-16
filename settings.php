@@ -3,6 +3,14 @@
 function mlf_page_admin() { 
     global $plugin_url, $plugin_prefix , $plugin_name;
 
+    $enabled_languages = mlf_get_option('enabled_languages');
+    $language_name_list = mlf_get_option('language_name');
+    
+    foreach ($enabled_languages as $language){
+        $language_label[$language] = $language_name_list[$language];
+    }    
+    
+    
     $options = array (
         array( "name" => $plugin_name." Options",
                "type" => "title"),
@@ -16,7 +24,8 @@ function mlf_page_admin() {
             "desc" => "Select the site default language",
             "id" => $plugin_prefix."default_language",
             "type" => "select",
-            "options" => mlf_get_option('enabled_languages'),
+            "options" => $enabled_languages,
+            "label" =>   $language_label,
             "std" => "blue"),
             
         array( "type" => "close"),
@@ -104,7 +113,13 @@ function mlf_page_admin() {
                 
                 <select name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>">
                 <?php foreach ($value['options'] as $option) { ?>
-                        <option <?php if (get_settings( $value['id'] ) == $option) { echo 'selected="selected"'; } ?>><?php echo $option; ?></option>
+                        <option <?php if (get_settings( $value['id'] ) == $option) { echo 'selected="selected"'; } ?> value="<?php echo $option; ?>">
+                        <?php if (isset($value['label'])) { ?>
+                            <?php echo $value['label'][$option]; ?>
+                        <? }else{ ?>
+                            <?php echo $option; ?>
+                        <? } ?>                            
+                        </option>
                 <?php } ?>
                 </select>
 
