@@ -1,31 +1,5 @@
 <?php
 
-/*
- * Coloque esse arquivo no functions.php de uma instalação nova do wordpress
- * 
- * Ele só funciona pra posts por enquanto, vai criar um Posts - ES e um Posts - EN
- * 
- * Em cada listagem vc vai poder criar versões nos outros dois idiomas
- * 
- * Proximos passos: Colocar um box na pagina de edição do post com o conteúdo do post nas outras linguas, para o tradutor ter de referencia
- * 
- * No box Traducoes, q fica do lado direito na pagina de edição, colocar o titulo dos posts nas outras linguas (quando houver)
- * 
- * Integrar com os idiomas gerados pelo admin do plugin
- * 
- * Criar automaticamente o mesmo esquema para Paginas
- * 
- */
-
-
-// CONFIGS //
-global $langs; 
-$langs = array('en', 'es');
-
-global $defaultLanguage;
-$defaultLanguage = 'pt';
-// CONFIGS //
-
 add_action('init', 'post_translations_init');
 
 // Creates a post type for each language
@@ -33,6 +7,8 @@ function post_translations_init() {
     global $langs;
    
     $language_name = mlf_get_option('language_name');
+    $enabled_languages = mlf_get_option('enabled_languages');
+    $default_language = mlf_get_option('default_language');
 
     $labels = array(
         'name' => _x('Post Translations', 'post type general name'),
@@ -57,7 +33,10 @@ function post_translations_init() {
         'supports' => array('title','editor','author','thumbnail','excerpt','comments')
     ); 
     
-    foreach ($langs as $l) {
+    foreach ($enabled_languages as $l) {
+        
+        if ($l == $default_language)
+            continue;
         
         $labels = array(
             'name' => _x('Posts - ' . $language_name[$l], 'post type general name'),
@@ -92,9 +71,11 @@ add_action('manage_posts_custom_column', 'post_translations_add_column', 10, 2);
 add_filter('manage_posts_columns', '_post_translations_add_column');
 
 function _post_translations_add_column($defaults) {
-    global $langs, $pagenow;
+    global $pagenow;
     
-    if(count($langs) <= 1 || get_query_var('post_status') == 'trash'){
+    $enabled_languages = mlf_get_option('enabled_languages');
+    
+    if(count($enabled_languages) <= 1 || get_query_var('post_status') == 'trash'){
         return $columns;
     }
     
@@ -110,29 +91,38 @@ function _post_translations_add_column($defaults) {
 function post_translations_add_column($column_name, $id) {
     
     if ($column_name=="post_translations") {
-        global $langs, $wpdb, $defaultLanguage, $plugin_url;
+        global $wpdb, $plugin_url;
+        
+        $enabled_languages = mlf_get_option('enabled_languages');
+        $default_language = mlf_get_option('default_language');
         
         $flag_location = mlf_get_option('flag_location');
         $post_type = get_query_var('post_type');
         $flag = mlf_get_option('flag');
         
-        foreach ($langs as $lang) {
+        // Quick Edit
+        if ($post_type == '' && DOING_AJAX) 
+            $post_type = $_POST['post_type'];
+        
+        
+        foreach ($enabled_languages as $lang) {
             
             $translation_id = false;
             $p_type = 'post_translations_' . $lang;            
             $flag_img = $plugin_url . $flag_location . $flag[$lang];
             
-            if ($post_type != 'post') {
-                // instead of checking for the current language, lets check for the default language
-                if ($p_type == $post_type) {
-                    $lang = $defaultLanguage;
-                    $p_type = 'post';
-                }
-            } 
+            if ($p_type == 'post_translations_' . $default_language)
+                $p_type = 'post';
+
+            if ( $post_type == $p_type ) {
+                continue;
+            }
+            
+            
             
             #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ";
             
-            if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ")) {                
+            if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ")) {                
                 echo "<a href='post.php?action=edit&post=$translation_id'>edit <img src='$flag_img'/></a> ";
             } else {
                 echo "<a href='post-new.php?post_type=$p_type&translation_of=$id'>add <img src='$flag_img'/></a> ";
@@ -145,11 +135,11 @@ add_action('admin_menu', 'post_translation_box');
 add_action('save_post', 'post_translation_save');
 
 function post_translation_box() {
-    global $langs;
+    $enabled_languages = mlf_get_option('enabled_languages');
     
     add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', 'post', 'side' );
     
-    foreach ($langs as $lang) {
+    foreach ($enabled_languages as $lang) {
         add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', 'post_translations_' . $lang, 'side' );
     }
 }
@@ -162,13 +152,22 @@ function post_translation_inner_box() {
     echo '<input type="hidden" name="post_translation_noncename" id="emissoras_noncename" value="' . 
       wp_create_nonce( 'post_translation_noncename' ) . '" />';
 
-    // The actual fields for data entry   
-    if ($_GET['translation_of']) {
-        echo '<input type="hidden" name="_translation_of" value="' . $_GET['translation_of'] . '" >';
+    if ($_GET['action'] != 'edit') {
+        $translation_of = $_GET['translation_of'];
+    } else {
+        $translation_of = get_post_meta($post->ID, '_translation_of');
+        if (is_array($translation_of))
+            $translation_of = $translation_of[0];
     }
     
-    global $langs, $wpdb, $defaultLanguage, $plugin_url;
     
+    echo '<input type="hidden" name="_translation_of" value="' . $translation_of . '" >';
+    
+    
+    global $wpdb, $plugin_url;
+    
+    $default_language = mlf_get_option('default_language');
+    $enabled_languages = mlf_get_option('enabled_languages');
 
     #só aparecer links pra criar ou editar traduções quando estiver editando posts
     if ($_GET['action'] != 'edit') {
@@ -180,30 +179,57 @@ function post_translation_inner_box() {
     $flag_location = mlf_get_option('flag_location');
     $flag = mlf_get_option('flag');   
     
-    foreach ($langs as $lang) {
+    foreach ($enabled_languages as $lang) {
         
         $translation_id = false;
-        $p_type = 'post_translations_' . $lang;
+        $p_type = 'post_translations_' . $lang;            
         $flag_img = $plugin_url . $flag_location . $flag[$lang];
         
-        if ($post_type != 'post') {
-            // instead of checking for the current language, lets check for the default language
-            if ($p_type == $post_type) {
-                $lang = $defaultLanguage;
-                $p_type = 'post';
-            }
+        if ($p_type == 'post_translations_' . $default_language)
+            $p_type = 'post';
+
+        if ( $post_type == $p_type ) {
+            continue;
         }
         
-        #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ";
         
-        if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ")) {
-            echo "<a href='post.php?action=edit&post=$translation_id'>edit <img src='$flag_img'/></a> ";        
+        
+        #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ";
+        
+        if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ")) {                
+            echo "<a href='post.php?action=edit&post=$translation_id'>edit <img src='$flag_img'/></a> ";
         } else {
-            echo "<a href='post-new.php?post_type=post_translations_$lang&translation_of={$post->ID}'>add <img src='$flag_img'/></a> ";
-        }   
+            echo "<a href='post-new.php?post_type=$p_type&translation_of={$post->ID}'>add <img src='$flag_img'/></a> ";
+        }
     }
 }
 
+
+function mlf_add_translation_relationship($original, $new) {
+
+    if (!$original || !$new)
+        return;
+    
+    add_post_meta($original, '_translation_of', $new);
+    add_post_meta($new, '_translation_of', $original);
+    
+    #var_dump($post_1, $post_2); die;
+    
+    $also_translation_of = get_post_meta($original, '_translation_of');
+    
+    if (is_array($also_translation_of)) {
+        foreach ($also_translation_of as $a) {
+            if ($a != $new) {
+                add_post_meta($new, '_translation_of', $a);
+                add_post_meta($a, '_translation_of', $new);
+            }
+        }
+    }
+    
+}
+
+global $mlf_avoid_recursive_save;
+$mlf_avoid_recursive_save = false;
 
 function post_translation_save( $post_id ) {
 
@@ -218,9 +244,45 @@ function post_translation_save( $post_id ) {
         if ( !current_user_can( 'edit_post', $post_id ) )
             return $post_id;
     }
-
-    add_post_meta($post_id, '_translation_of', $_POST['_translation_of']);
-    add_post_meta($_POST['_translation_of'], '_translation_of', $post_id);
+    
+    #var_dump($_POST['_translation_of']);
+    
+    mlf_add_translation_relationship($_POST['_translation_of'], $post_id);
+    
+    global $mlf_avoid_recursive_save;
+    
+    
+    if ($_POST['mlf_copy_date'] == 1 && $_POST['_translation_of'] && $mlf_avoid_recursive_save === false) {
+        $mlf_avoid_recursive_save = true;
+        $from = get_post($_POST['_translation_of'], 'ARRAY_A');
+        #$to = get_post($post_id, 'ARRAY_A');
+        
+        #$to['post_date'] = $from['post_date'];
+        #$to['post_date_gmt'] = $from['post_date_gmt'];
+        
+        #print_r($to); die;
+        
+        #wp_insert_post($to); // this will create an endless loop, we can avoid it with a global variable or:
+        
+        global $wpdb;
+        #$wpdb->update($wpdb->posts, $to, $to['ID']);
+        mysql_query("UPDATE $wpdb->posts SET post_date = '" . $from['post_date'] . "', post_date_gmt = '" . $from['post_date_gmt'] . "' WHERE ID = " . $post_id);
+              
+    }
     
     return $post_id;
+}
+
+add_action('post_submitbox_misc_actions', 'mlf_copy_date_checkbox');
+
+function mlf_copy_date_checkbox() {
+    global $pagenow;
+    
+    if ($pagenow == 'post-new.php' && $from = $_GET['translation_of']) {
+    
+        echo '<br /><input type="checkbox" name="mlf_copy_date" value="1" checked>';
+        _e('Copy the date of the original post when I first save this translation', 'mlf');
+        
+    }
+
 }

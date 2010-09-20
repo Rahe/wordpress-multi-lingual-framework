@@ -237,6 +237,8 @@ function create_default_settings(){
         '1' => 'es', 
         '2' => 'en'
     );
+    
+    $mlf_config['default_language'] =  "pt";
 
     foreach ($mlf_config as $name => $value){
         update_option( $plugin_prefix . $name, $value);
