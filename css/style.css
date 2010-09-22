@@ -121,3 +121,29 @@
 .mlf_input label{
     
 }
+
+
+.icon_add,
+.icon_edit {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	margin-left: 5px;
+	}
+.icon_add span,
+.icon_edit span {
+	display: none;
+	}
+	
+.icon_add {
+	background:url('../images/add_16x16.gif') no-repeat 0 0;
+}
+.icon_edit {
+	background:url('../images/edit_16x16.gif') no-repeat 0 0;
+}
+.icon_add:hover {
+	background:url('../images/add_16x16_hover.gif') no-repeat 0 0;
+}
+.icon_edit:hover {
+	background:url('../images/edit_16x16_hover.gif') no-repeat 0 0;
+}

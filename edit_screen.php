@@ -123,9 +123,9 @@ function post_translations_add_column($column_name, $id) {
             #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ";
             
             if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ")) {                
-                echo "<a href='post.php?action=edit&post=$translation_id'>edit <img src='$flag_img'/></a> ";
+                echo "<a title='Edit' href='post.php?action=edit&post=$translation_id'><span class='icon_edit'><span>edit</span></span> <img src='$flag_img'/></a> ";
             } else {
-                echo "<a href='post-new.php?post_type=$p_type&translation_of=$id'>add <img src='$flag_img'/></a> ";
+                echo "<a title='Add' href='post-new.php?post_type=$p_type&translation_of=$id'><span class='icon_add'><span>add</span> </span> <img src='$flag_img'/></a> ";
             }
         }
     }
@@ -197,9 +197,9 @@ function post_translation_inner_box() {
         #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ";
         
         if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ")) {                
-            echo "<a href='post.php?action=edit&post=$translation_id'>edit <img src='$flag_img'/></a> ";
+            echo "<a title='Edit' href='post.php?action=edit&post=$translation_id'><span class='icon_edit'><span>edit</span></span> <img src='$flag_img'/></a> ";
         } else {
-            echo "<a href='post-new.php?post_type=$p_type&translation_of={$post->ID}'>add <img src='$flag_img'/></a> ";
+            echo "<a title='Add' href='post-new.php?post_type=$p_type&translation_of={$post->ID}'><span class='icon_add'><span>add</span> </span> <img src='$flag_img'/></a> ";
         }
     }
 }
