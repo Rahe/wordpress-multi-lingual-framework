@@ -44,7 +44,6 @@ function mlf_page_admin() {
     );        
    
     $i=0;
- 
 ?>
     <div class="wrap mlf_wrap">
         <h2><?php echo $plugin_name; ?> Settings</h2>

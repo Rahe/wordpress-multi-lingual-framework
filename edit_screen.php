@@ -1,5 +1,7 @@
 <?php
 
+#var_dump(get_locale());
+
 add_action('init', 'post_translations_init');
 
 // Creates a post type for each language
@@ -205,23 +207,40 @@ function post_translation_inner_box() {
 }
 
 
+
+# when saving a meta, check if the pair of key value already exists, if so update, if not create
+# WordPress core functions for post_meta does not work like that
+function mlf_add_post_meta($post_id, $meta_key, $meta_value) {
+    global $wpdb;
+    
+    $meta_value = maybe_serialize( stripslashes_deep($meta_value) );
+    
+    if ( $wpdb->get_var( $wpdb->prepare(
+		"SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = %s AND post_id = %d AND meta_value = %s",
+		$meta_key, $post_id, $meta_value ) ) )
+		return false;
+    
+    add_post_meta($post_id, $meta_key, $meta_value);
+    
+}
+
 function mlf_add_translation_relationship($original, $new) {
 
     if (!$original || !$new)
         return;
     
-    add_post_meta($original, '_translation_of', $new);
-    add_post_meta($new, '_translation_of', $original);
+    mlf_add_post_meta($original, '_translation_of', $new);
+    mlf_add_post_meta($new, '_translation_of', $original);
     
-    #var_dump($post_1, $post_2); die;
+    #var_dump($original, $new); die;
     
     $also_translation_of = get_post_meta($original, '_translation_of');
     
     if (is_array($also_translation_of)) {
         foreach ($also_translation_of as $a) {
             if ($a != $new) {
-                add_post_meta($new, '_translation_of', $a);
-                add_post_meta($a, '_translation_of', $new);
+                mlf_add_post_meta($new, '_translation_of', $a);
+                mlf_add_post_meta($a, '_translation_of', $new);
             }
         }
     }
@@ -245,7 +264,7 @@ function post_translation_save( $post_id ) {
             return $post_id;
     }
     
-    #var_dump($_POST['_translation_of']);
+    #var_dump($_POST['_translation_of']); die;
     
     mlf_add_translation_relationship($_POST['_translation_of'], $post_id);
     

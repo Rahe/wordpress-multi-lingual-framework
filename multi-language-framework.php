@@ -21,6 +21,7 @@ require_once(dirname(__FILE__) . "/settings.php");
 require_once(dirname(__FILE__) . "/core-functions.php");
 require_once(dirname(__FILE__) . "/utils.php");
 require_once(dirname(__FILE__) . "/edit_screen.php");
+require_once(dirname(__FILE__) . "/wp_options.php");
 
 
 function mlf_init() {
