@@ -144,33 +144,4 @@ add_filter('locale',        'mlf_localeForCurrentLanguage',99);
 
 add_action('plugins_loaded','mlf_init');
 
-add_action('admin_menu', 'mlf_other_versions_add_box');
-
-/* Adds a custom section to the "advanced" Post and Page edit screens */
-function mlf_other_versions_add_box() {
-
-    add_meta_box( 'mlf_other_version_id','Outras versoes do texto','mlf_other_versions_box', 'post', 'normal', 'high' );
-}
-
-function mlf_other_versions_box(){
-    global $post;
-
-    $edit_post = $post;
-
-    $posts = new WP_Query('meta_key=_translation_of&meta_value=' . $post->ID . '&post_type=any');
-
-    if ( $posts->have_posts() ){
-       while ( $posts->have_posts() ){
-           $posts->the_post();
-
-	   echo '<h2>' . the_title() . '</h2>';
-	   the_content();
-
-       }
-    }   
-   
-    $post = $edit_post;
-}
-
-
 ?>

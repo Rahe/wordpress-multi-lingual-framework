@@ -216,9 +216,9 @@ function mlf_add_post_meta($post_id, $meta_key, $meta_value) {
     $meta_value = maybe_serialize( stripslashes_deep($meta_value) );
     
     if ( $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = %s AND post_id = %d AND meta_value = %s",
-		$meta_key, $post_id, $meta_value ) ) )
-		return false;
+        "SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key = %s AND post_id = %d AND meta_value = %s",
+        $meta_key, $post_id, $meta_value ) ) )
+        return false;
     
     add_post_meta($post_id, $meta_key, $meta_value);
     
@@ -305,3 +305,58 @@ function mlf_copy_date_checkbox() {
     }
 
 }
+
+add_action('admin_menu', 'mlf_other_versions_add_box');
+
+function mlf_other_versions_add_box() {
+    add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', 'post', 'normal', 'high' );
+}
+
+function mlf_other_versions_box(){
+    global $post, $plugin_url;
+
+    $flag_location = mlf_get_option('flag_location');
+    $flag = mlf_get_option('flag');
+
+    $edit_post = $post;
+
+    $posts = new WP_Query('meta_key=_translation_of&meta_value=' . $post->ID . '&post_type=any');
+
+    if ( $posts->have_posts() ){
+        $translation_version = array();
+
+        while ( $posts->have_posts() ){
+            $posts->the_post();
+            $lang = substr($post->post_type,-2,2);
+            $translation_version[$lang] = '<h2>' . get_the_title() . '</h2>' . get_the_content();
+        }
+
+        $post = $edit_post;
+
+    ?>
+        <div class="translation_div">
+            <ul class="translation_tabs">
+                <?php
+                    foreach ($translation_version as $lang => $text){
+                        $flag_img = $plugin_url . $flag_location . $flag[$lang];
+                        echo '<li class="' . $class . '"><a href="#post_translation_'. $lang . '"><img src="' . $flag_img . '"></a></li>';
+                    }
+                 ?>
+            </ul>
+            <div class="post_translation_container">
+                <?php
+                    foreach ($translation_version as $lang => $text){
+                        echo '<div id="post_translation_' . $lang .'" class="translation_content"> ';
+                        echo apply_filters('the_content', $text);
+                        echo '</div>';
+                    }
+                 ?>
+            </div>
+       </div> 
+    <?php
+
+    }
+
+    $post = $edit_post;
+}
+

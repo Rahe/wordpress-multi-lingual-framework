@@ -122,28 +122,88 @@
     
 }
 
-
 .icon_add,
 .icon_edit {
-	display: inline-block;
-	width: 16px;
-	height: 16px;
-	margin-left: 5px;
-	}
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 5px;
+    }
 .icon_add span,
 .icon_edit span {
-	display: none;
-	}
-	
+    display: none;
+    }
+    
 .icon_add {
-	background:url('../images/add_16x16.gif') no-repeat 0 0;
+    background:url('../images/add_16x16.gif') no-repeat 0 0;
 }
 .icon_edit {
-	background:url('../images/edit_16x16.gif') no-repeat 0 0;
+    background:url('../images/edit_16x16.gif') no-repeat 0 0;
 }
 .icon_add:hover {
-	background:url('../images/add_16x16_hover.gif') no-repeat 0 0;
+    background:url('../images/add_16x16_hover.gif') no-repeat 0 0;
 }
 .icon_edit:hover {
-	background:url('../images/edit_16x16_hover.gif') no-repeat 0 0;
+    background:url('../images/edit_16x16_hover.gif') no-repeat 0 0;
 }
+
+/* metabox other version of post */
+ul.translation_tabs {
+    margin: 0;
+    padding: 0;
+    float: left;
+    list-style: none;
+    height: 32px;
+    border-bottom: 1px solid #DFDFDF;
+    border-left: 1px solid #DFDFDF;
+    width: 100%;
+}
+ul.translation_tabs li {
+    float: left;
+    margin: 0;
+    padding: 0;
+    height: 31px;
+    line-height: 31px;
+    border: 1px solid #DFDFDF;
+    border-left: none;
+    margin-bottom: -1px;
+    overflow: hidden;
+    position: relative;
+    background: #e0e0e0;
+}
+ul.translation_tabs li a {
+    text-decoration: none;
+    color: #000;
+    display: block;
+    font-size: 1.2em;
+    padding: 10px 20px;
+    outline: none;
+}
+ul.translation_tabs li a:hover {
+    background: #ccc;
+}
+html ul.translation_tabs li.active, html ul.translation_tabs li.active a:hover  {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+}
+.post_translation_container{
+    padding: 7px;
+    overflow: auto;
+    height: 200px;
+}
+
+/*
+.post_translation_container{
+    border: 1px solid #DFDFDF;
+    border-top: none;
+    padding: 7px;
+}
+.tab_container {
+    border: 1px solid #DFDFDF;
+    border-top: none;
+    overflow: hidden;
+    clear: both;
+    float: left; width: 100%;
+    background: #fff;
+}
+*/
