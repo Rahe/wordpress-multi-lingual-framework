@@ -190,20 +190,6 @@ html ul.translation_tabs li.active, html ul.translation_tabs li.active a:hover  
     padding: 7px;
     overflow: auto;
     height: 200px;
-}
-
-/*
-.post_translation_container{
     border: 1px solid #DFDFDF;
     border-top: none;
-    padding: 7px;
 }
-.tab_container {
-    border: 1px solid #DFDFDF;
-    border-top: none;
-    overflow: hidden;
-    clear: both;
-    float: left; width: 100%;
-    background: #fff;
-}
-*/
