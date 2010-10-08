@@ -2,11 +2,12 @@
 Contributors: BIREME, HackLab
 Donate link: http://reddes.bvsalud.org/projects/multi-language-framework/
 Tags: multilanguage, translation, cms
-Requires at least: 2.7
-Tested up to: 2.9.2
-Stable tag: trunk
+Requires at least: 3.0
+Tested up to: 3.0.1
 
 Handles creation of multilingual content.
+
+** Plugin is under development. Please be patient. **
 
 == Description ==
 
