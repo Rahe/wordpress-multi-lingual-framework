@@ -7,12 +7,12 @@ Tested up to: 3.0.1
 
 Handles creation of multilingual content.
 
-** Plugin is under development. Please be patient. **
 
 == Description ==
 
 Handles creation of multilingual content.
 
+** Plugin is under development. Please be patient. **
 
 == Installation ==
 
