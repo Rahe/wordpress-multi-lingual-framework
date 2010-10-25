@@ -309,12 +309,20 @@ function mlf_copy_date_checkbox() {
 add_action('admin_menu', 'mlf_other_versions_add_box');
 
 function mlf_other_versions_add_box() {
+    $enabled_languages = mlf_get_option('enabled_languages');
+
     add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', 'post', 'normal', 'high' );
+
+    foreach ($enabled_languages as $lang) {
+        add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', 'post_translations_' . $lang, 'normal', 'high' );
+    }
+
 }
 
 function mlf_other_versions_box(){
     global $post, $plugin_url;
 
+    $default_language = mlf_get_option('default_language');
     $flag_location = mlf_get_option('flag_location');
     $flag = mlf_get_option('flag');
 
@@ -327,7 +335,13 @@ function mlf_other_versions_box(){
 
         while ( $posts->have_posts() ){
             $posts->the_post();
-            $lang = substr($post->post_type,-2,2);
+            
+            if ($post->post_type == 'post'){
+                $lang = $default_language;
+            }else{
+                $lang = substr($post->post_type,-2,2);    
+            }
+            
             $translation_version[$lang] = '<h2>' . get_the_title() . '</h2>' . get_the_content();
         }
 
