@@ -1,38 +1,42 @@
 <?php
+global $wpdb, $mlf_options_restore;
 
-#add_action('wp', 'mlf_option_filters');
+$mlf_all_options = $wpdb->get_col("SELECT option_name FROM $wpdb->options");
 
-
-#function mlf_option_filters() {
-#echo 'bbbbbbbbbbb';
-    global $wpdb;
-
-    $mlf_all_options = $wpdb->get_col("SELECT option_name FROM $wpdb->options");
-
-    foreach ($mlf_all_options as $o) {
-        if (!preg_match('/^mlf_\S+_/', $o)) {
-      
-      
-            
-            add_filter('pre_option_' . $o, 'mlf_pre_option');
-            
-            
-        }
+foreach ($mlf_all_options as $o) {
+    if (!preg_match('/^mlf_\S+_/', $o)) {
+        add_filter('pre_option_' . $o, 'mlf_pre_option');
     }
+}
 
-
-    add_action('updated_option', 'mlf_update_option', 10, 3);
-    #add_filter('get_option', 'mlf_get_option_filter', 10, 3);
-    
-#}
-
+add_action('update_option', 'mlf_update_option', 10, 3);
+add_action('updated_option', 'mlf_updated_option', 10, 3);
 
 function mlf_update_option($option, $old_value, $new_value) {
 
     if (preg_match('/^mlf_\S+_/', $option))
         return false;
     
-    global $wpdb, $admin_language;
+    global $wpdb, $admin_language, $mlf_options_restore;
+    
+    $default_language = mlf_get_option('default_language');
+    
+    if ($admin_language == $default_language)
+        return false;
+    
+    // We need to save the value before its updated so we can restore it afterwars
+    // On the updated_option hook we can not trust $old_value, because its already filtered in the get_option() call
+    
+    // save value
+    $mlf_options_restore[$option] = $wpdb->get_var("SELECT option_value FROM $wpdb->options WHERE option_name = '$option' LIMIT 1");
+    }
+
+function mlf_updated_option($option, $old_value, $new_value) {
+
+    if (preg_match('/^mlf_\S+_/', $option))
+        return false;
+    
+    global $wpdb, $admin_language, $mlf_options_restore;
     
     $default_language = mlf_get_option('default_language');
     
@@ -40,6 +44,11 @@ function mlf_update_option($option, $old_value, $new_value) {
         return false;
     
     // restore old_value
+    
+    //print_r($mlf_options_restore); die('aaa');
+    
+    $old_value = $mlf_options_restore[$option];
+    
     $wpdb->update( $wpdb->options, array( 'option_value' => $old_value ), array( 'option_name' => $option ) );
     
     //save new value to the language option
@@ -68,27 +77,4 @@ function mlf_pre_option($r) {
 
 }
 
-
-/* Não está sendo usada, era a função que usava se fosse usar o novo filtro q eu fiz o patch */
-function mlf_get_option_filter($flag, $option, $default) {
-    
-    if (preg_match('/^mlf_\S+_/', $option))
-        return false;
-    
-    global $admin_language, $wpdb;
-    
-    $default_language = mlf_get_option('default_language');
-    
-    #if ($option == 'blogname')
-    #    var_dump(get_option('mlf_' . $admin_language . '_' . $option));
-    #var_dump( $admin_language , $default_language); die;
-    
-    if ($admin_language != $default_language && $value = get_option('mlf_' . $admin_language . '_' . $option, false) ) {
-        #if ($option == 'blogname') die('aa');
-        return $value;
-    } else {
-        return false;
-    }
-
-}
 ?>
