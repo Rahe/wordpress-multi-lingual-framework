@@ -37,14 +37,22 @@ function mlf_page_admin() {
             "desc" => "Choose a url mode",
             "id" => $plugin_prefix."url_mode",
             "type" => "radio",
-            "options" => array("query" => "Use Query Mode (?lang=en)", "path" => "Use Path Mode (puts /en/ in front of URL)"),
+            "options" => array("query" => "Use Query Mode (?lang=en)", "path" => "Use Path Mode (puts /en/ in front of URL)", "subdomain" => "Use subdomains (en.yoursite.com)"),
             "std" => "Choose a category"),
             
         array( "type" => "close")
     );        
    
     $i=0;
+    global $mlf_config;
 ?>
+    <h1>No settings page yet</h1>
+    Default settings:
+    
+    <pre>
+    <?php print_r($mlf_config); ?>
+    </pre>
+    <!--
     <div class="wrap mlf_wrap">
         <h2><?php echo $plugin_name; ?> Settings</h2>
      
@@ -180,7 +188,7 @@ function mlf_page_admin() {
             </p>   
             </form>  
         </div> 
-
+        -->
 <?php
 }
 ?>

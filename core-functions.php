@@ -162,4 +162,160 @@ function mlf_localeForCurrentLanguage($locale){
 }
 
 
+function mlf_convertURL($url='', $lang='', $forceadmin = false) {
+	global $mlf_config;
+	
+	// invalid language
+	if($url=='') $url = esc_url($mlf_config['url_info']['url']);
+	if($lang=='') $lang = $mlf_config['language'];
+	if(defined('WP_ADMIN')&&!$forceadmin) return $url;
+	if(!mlf_isEnabled($lang)) return "";
+	
+	// & workaround
+	$url = str_replace('&amp;','&',$url);
+	$url = str_replace('&#038;','&',$url);
+	
+	// check for trailing slash
+	$nottrailing = (strpos($url,'?')===false && strpos($url,'#')===false && substr($url,-1,1)!='/');
+	
+	// check if it's an external link
+	$urlinfo = mlf_parseURL($url);
+	$home = rtrim(get_option('home'),"/");
+	if($urlinfo['host']!='') {
+		// check for already existing pre-domain language information
+		if($mlf_config['url_mode'] == 'subdomain' && preg_match("#^([a-z]{2}).#i",$urlinfo['host'],$match)) {
+			if(mlf_isEnabled($match[1])) {
+				// found language information, remove it
+				$url = preg_replace("/".$match[1]."\./i","",$url, 1);
+				// reparse url
+				$urlinfo = mlf_parseURL($url);
+			}
+		}
+		if(substr($url,0,strlen($home))!=$home) {
+			return $url;
+		}
+		// strip home path
+		$url = substr($url,strlen($home));
+	} else {
+		// relative url, strip home path
+		$homeinfo = mlf_parseURL($home);
+		if($homeinfo['path']==substr($url,0,strlen($homeinfo['path']))) {
+			$url = substr($url,strlen($homeinfo['path']));
+		}
+	}
+	
+	// check for query language information and remove if found
+	if(preg_match("#(&|\?)lang=([^&\#]+)#i",$url,$match) && mlf_isEnabled($match[2])) {
+		$url = preg_replace("#(&|\?)lang=".$match[2]."&?#i","$1",$url);
+	}
+	
+	// remove any slashes out front
+	$url = ltrim($url,"/");
+	
+	// remove any useless trailing characters
+	$url = rtrim($url,"?&");
+	
+	// reparse url without home path
+	$urlinfo = mlf_parseURL($url);
+	
+	// check if its a link to an ignored file type
+	$ignore_file_types = preg_split('/\s*,\s*/', strtolower($mlf_config['ignore_file_types']));
+	$pathinfo = pathinfo($urlinfo['path']);
+	if(isset($pathinfo['extension']) && in_array(strtolower($pathinfo['extension']), $ignore_file_types)) {
+		return $home."/".$url;
+	}
+	
+	// dirty hack for wp-login.php
+	if(strpos($url,"wp-login.php")!==false) {
+		return $home."/".$url;
+	}
+	
+	switch($mlf_config['url_mode']) {
+		case 'path':	// pre url
+			// might already have language information
+			if(preg_match("#^([a-z]{2})/#i",$url,$match)) {
+				if(mlf_isEnabled($match[1])) {
+					// found language information, remove it
+					$url = substr($url, 3);
+				}
+			}
+			if(!$mlf_config['hide_default_language']||$lang!=$mlf_config['default_language']) $url = $lang."/".$url;
+			break;
+		case 'subdomain':	// pre domain 
+			if(!$mlf_config['hide_default_language']||$lang!=$mlf_config['default_language']) $home = preg_replace("#//#","//".$lang.".",$home,1);
+			break;
+		default: // query
+			if(!$mlf_config['hide_default_language']||$lang!=$mlf_config['default_language']){
+				if(strpos($url,'?')===false) {
+					$url .= '?';
+				} else {
+					$url .= '&';
+				}
+				$url .= "lang=".$lang;
+			}
+	}
+	
+	// see if cookies are activated
+	if(!$mlf_config['cookie_enabled'] && !$mlf_config['url_info']['internal_referer'] && $urlinfo['path'] == '' && $lang == $mlf_config['default_language'] && $mlf_config['language'] != $mlf_config['default_language'] && $mlf_config['hide_default_language']) {
+		// :( now we have to make unpretty URLs
+		$url = preg_replace("#(&|\?)lang=".$match[2]."&?#i","$1",$url);
+		if(strpos($url,'?')===false) {
+			$url .= '?';
+		} else {
+			$url .= '&';
+		}
+		$url .= "lang=".$lang;
+	}
+	
+	// &amp; workaround
+	$complete = str_replace('&','&amp;',$home."/".$url);
+
+	// remove trailing slash if there wasn't one to begin with
+	if($nottrailing && strpos($complete,'?')===false && strpos($complete,'#')===false && substr($complete,-1,1)=='/')
+		$complete = substr($complete,0,-1);
+	
+	return $complete;
+}
+
+
+add_filter('redirect_canonical',			'mlf_checkCanonical', 10, 2);
+
+function mlf_checkCanonical($redirect_url, $requested_url) {
+	// fix canonical conflicts with language urls
+    
+    //var_dump(mlf_convertURL($redirect_url),mlf_convertURL($requested_url)); die;
+	if(mlf_convertURL($redirect_url)==mlf_convertURL($requested_url)) 
+		return false;
+	return $redirect_url;
+}
+
+add_filter('the_content', 'mlf_add_link_to_other_languages');
+
+function mlf_add_link_to_other_languages($content) {
+
+    global $post, $mlf_config;
+    
+    $other_languages = mlf_get_tranlsations_ids($post->ID, $post->post_type);
+    
+    // We have to temporarily change the language to retrieve unflitered permalinks
+    $currentLanguage = $mlf_config['language'];
+    $mlf_config['language'] = $mlf_config['default_language'];
+    
+    foreach($other_languages as $l) {
+    
+        if ($l) {
+            
+            $r .= "<a href='" . get_permalink($l) . "'>" . get_permalink($l) . "</a>";
+        
+        }
+    
+    }
+    
+    //restore language
+    $mlf_config['language'] = $currentLanguage;
+    
+    return $content . $r;
+
+}
+
 ?>

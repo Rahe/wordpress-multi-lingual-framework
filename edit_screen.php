@@ -56,7 +56,7 @@ function post_translations_init() {
         $args = array(
             'labels' => $labels,
             'public' => true,
-            'rewrite' => false,
+            'rewrite' => array('slug' => $l),
             'capability_type' => 'post',
             'hierarchical' => false,
             'menu_position' => 5,

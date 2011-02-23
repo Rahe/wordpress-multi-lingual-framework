@@ -238,7 +238,11 @@ function create_default_settings(){
         '2' => 'en'
     );
     
+    $mlf_config['hide_default_language'] = true;
+    
     $mlf_config['default_language'] =  "pt";
+    
+    $mlf_config['url_mode'] =  "path";
 
     foreach ($mlf_config as $name => $value){
         update_option( $plugin_prefix . $name, $value);
