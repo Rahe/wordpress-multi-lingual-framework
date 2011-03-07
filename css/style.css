@@ -193,3 +193,7 @@ html ul.translation_tabs li.active, html ul.translation_tabs li.active a:hover  
     border: 1px solid #DFDFDF;
     border-top: none;
 }
+
+.translation_div {
+    overflow: hidden;
+}

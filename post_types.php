@@ -136,9 +136,11 @@ function post_translation_box() {
     foreach ($post_types as $p) {
     
         add_meta_box( 'post_translations',__('Post Translations', 'mlf'), 'post_translation_inner_box', $p, 'side' );
+        add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', $p, 'normal', 'high' );
         
         foreach ($enabled_languages as $lang) {
             add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', $p . '_translations_' . $lang, 'side' );
+            add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', $p . '_translations_' . $lang, 'normal', 'high' );
         }
     
     }
@@ -309,19 +311,6 @@ function mlf_copy_date_checkbox() {
 
 }
 
-add_action('admin_menu', 'mlf_other_versions_add_box');
-
-function mlf_other_versions_add_box() {
-    $enabled_languages = mlf_get_option('enabled_languages');
-
-    add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', 'post', 'normal', 'high' );
-
-    foreach ($enabled_languages as $lang) {
-        add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', 'post_translations_' . $lang, 'normal', 'high' );
-    }
-
-}
-
 function mlf_other_versions_box(){
     global $post;
 
@@ -339,12 +328,11 @@ function mlf_other_versions_box(){
         while ( $posts->have_posts() ){
             $posts->the_post();
             
-            if ($post->post_type == 'post'){
+            if (preg_match('/^\S+_translations_(\S{2})$/', $post->post_type))
+                $lang = preg_replace('/^\S+_translations_(\S{2})$/', "$1", $post->post_type);
+            else
                 $lang = $default_language;
-            }else{
-                $lang = substr($post->post_type,-2,2);    
-            }
-            
+                
             $translation_version[$lang] = '<h2>' . get_the_title() . '</h2>' . get_the_content();
         }
 
