@@ -1,194 +1,88 @@
 <?php
 
 function mlf_page_admin() { 
-    global $plugin_url, $plugin_prefix , $plugin_name;
+    global $wp_post_types;
+    
+    $mlf_config = get_option('mlf_config');
 
-    $enabled_languages = mlf_get_option('enabled_languages');
-    $language_name_list = mlf_get_option('language_name');
+    $mlf_static = mlf_load_static_options();
     
-    foreach ($enabled_languages as $language){
-        $language_label[$language] = $language_name_list[$language];
-    }    
-    
-    
-    $options = array (
-        array( "name" => $plugin_name." Options",
-               "type" => "title"),
-               
-        array( "name" => "General",
-               "type" => "section"),
-        
-        array( "type" => "open"),    
-         
-        array( "name" => "Default Language",
-            "desc" => "Select the site default language",
-            "id" => $plugin_prefix."default_language",
-            "type" => "select",
-            "options" => $enabled_languages,
-            "label" =>   $language_label,
-            "std" => "blue"),
-            
-        array( "type" => "close"),
-        array( "name" => "Advanced",
-            "type" => "section"),
-        array( "type" => "open"),
-        
-        array( "name" => "URL Modification Mode",
-            "desc" => "Choose a url mode",
-            "id" => $plugin_prefix."url_mode",
-            "type" => "radio",
-            "options" => array("query" => "Use Query Mode (?lang=en)", "path" => "Use Path Mode (puts /en/ in front of URL)", "subdomain" => "Use subdomains (en.yoursite.com)"),
-            "std" => "Choose a category"),
-            
-        array( "type" => "close")
-    );        
-   
-    $i=0;
-    global $mlf_config;
-?>
-    <h1>No settings page yet</h1>
-    Default settings:
-    
-    <pre>
-    <?php print_r($mlf_config); ?>
-    </pre>
-    <!--
-    <div class="wrap mlf_wrap">
-        <h2><?php echo $plugin_name; ?> Settings</h2>
-     
-        <div class="mlf_opts">
-    
-            <form method="post" action="options.php">
-            
-            <?php settings_fields( 'multi-language-settings-group' ); ?>
-            
-            <?php foreach ($options as $value) {
-
-            switch ( $value['type'] ) {
-         
-                case "open":
-                    break;
-            
-                case "close":
-            ?>             
-                </div>
-            </div>
-            <br />
-
-            <?php 
-                break;
-             
-                case "title":
-            ?>            
-            <p>To easily use the <?php echo $themename;?> theme, you can use the menu below.</p>
-             
-            <?php 
-                break; 
+    ?>
+    <div class="wrap">
+		
+		
+			<form method="post" action="options.php">
+			
+			
+				<?php settings_fields('multi-language-settings-group'); ?>
+				
+                <h2><?php _e('Multi Language Options', 'mlf'); ?></h2>
                 
-                case "text":
-            ?>
-
-            <div class="mlf_input mlf_text">
-            
-                <label for="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
-                <input name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" value="<?php if ( get_settings( $value['id'] ) != "") { echo stripslashes(get_settings( $value['id'])  ); } else { echo $value['std']; } ?>" />
-                <small><?php echo $value['desc']; ?></small><div class="clearfix"></div>
-             
-             </div>
-            
-            <?php 
-                break;
-             
-                case "textarea":
-            ?>
-
-            <div class="mlf_input mlf_textarea">
-            
-                <label for="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
-                <textarea name="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" cols="" rows=""><?php if ( get_settings( $value['id'] ) != "") { echo stripslashes(get_settings( $value['id']) ); } else { echo $value['std']; } ?></textarea>
-                <small><?php echo $value['desc']; ?></small><div class="clearfix"></div>             
-             </div>
-              
-            <?php
-                break;
-             
-                case "select":
-            ?>
-
-            <div class="mlf_input mlf_select">
-                <label for="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
+				<h3><?php _e('Default language', 'mlf'); ?></h3>
+				
+                    <select name="mlf_config[default_language]">
+                    <?php foreach( $mlf_config['enabled_languages'] as $lang ) : ?>
+                    
+                        <option value="<?php echo $lang; ?>" <?php if ($lang == $mlf_config['default_language']) echo 'selected'; ?> > <?php echo $mlf_static['language_name'][$lang]; ?></option>
+                    
+                    <?php endforeach; ?>
+                    </select>
+                    
+                <h3><?php _e('URL Mode', 'mlf'); ?></h3>
                 
-                <select name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>">
-                <?php foreach ($value['options'] as $option) { ?>
-                        <option <?php if (get_settings( $value['id'] ) == $option) { echo 'selected="selected"'; } ?> value="<?php echo $option; ?>">
-                        <?php if (isset($value['label'])) { ?>
-                            <?php echo $value['label'][$option]; ?>
-                        <? }else{ ?>
-                            <?php echo $option; ?>
-                        <? } ?>                            
-                        </option>
-                <?php } ?>
-                </select>
-
-                <small><?php echo $value['desc']; ?></small><div class="clearfix"></div>
-            </div>
-            
-            <?php
-                break;
-             
-                case "checkbox":
-            ?>
-
-            <div class="mlf_input mlf_checkbox">
-                <label for="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
+                    <input type="radio" name="mlf_config[url_mode]" value="subdomain" <?php if ('subdomain' == $mlf_config['url_mode']) echo 'checked'; ?> > <?php _e('subdomain - es.mysite.com', 'mlf'); ?>  UNTESTED<br />
+                    <input type="radio" name="mlf_config[url_mode]" value="path" <?php if ('path' == $mlf_config['url_mode']) echo 'checked'; ?> > <?php _e('subdirectory - mysite.com/es', 'mlf'); ?> <br />
+                    <input type="radio" name="mlf_config[url_mode]" value="querystring" <?php if ('querystring' == $mlf_config['url_mode']) echo 'checked'; ?> > <?php _e('query string - mysite.com/?lang=es', 'mlf'); ?> UNTESTED<br />
                 
-                <?php if(get_option($value['id'])){ $checked = "checked=\"checked\""; }else{ $checked = "";} ?>
-                <input type="checkbox" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" value="true" <?php echo $checked; ?> />
-
-                <small><?php echo $value['desc']; ?></small><div class="clearfix"></div>
-             </div>
-             
-            <?php
-                break;
-             
-                case "radio":
-            ?>
-
-            <div class="mlf_input mlf_radio">
-                <label for="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
-
-                <ul>
-                    <?php foreach ($value['options'] as $option => $label) { ?>                    
-                        <li><input type="radio" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" value="<?php echo $option ?>"  <?php if (get_settings( $value['id'] ) == $option) { echo 'checked="checked"'; } ?>><?php echo $label ?></li>
-                    <?php } ?>  
-                </ul>
-                <small><?php echo $value['desc']; ?></small><div class="clearfix"></div>
-             </div>
-            <?php 
-                break; 
-                case "section":
-
-                $i++;
-
-            ?>
-
-            <div class="mlf_section">
-                <div class="mlf_title"><h3><img src="<?php echo $plugin_url; ?>images/trans.png" class="inactive" alt="""><?php echo $value['name']; ?></h3><span class="submit"><input name="save<?php echo $i; ?>" type="submit" value="Save changes" />
-                </span><div class="clearfix"></div></div>
-                <div class="mlf_options">
-             
-            <?php 
-                break;
-            }   // close switch
-        }   // close foreach
-        ?>             
+                
+                <h3><?php _e('Post types that will be translated', 'mlf'); ?></h3>
+                
+                    <?php foreach ($wp_post_types as $type_name => $type) : ?>
+                        
+                        <?php if ($type_name == 'attachment' || $type_name == 'revision' || $type_name == 'nav_menu_item' || preg_match('/_translations_/', $type_name)) continue; ?>
+                    
+                        <input type="checkbox" name="mlf_config[post_types][]" value="<?php echo $type_name; ?>" <?php if (in_array($type_name, $mlf_config['post_types'])) echo 'checked'; ?> > <?php echo $type_name; ?> <br />
+                    
+                    <?php endforeach; ?>
+                
+                
+                <h3><?php _e('Languages', 'mlf'); ?></h3>
+                    <table>
+                        <tr>
+                            <td>Enabled</td>
+                            <td>Language</td>
+                            <td>Not Available message</td>
+                            <td>Translation available link label</td>
+                        </tr>
+                    
+                    <?php foreach ($mlf_static['language_name'] as $lang => $name): ?>
+                    
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="mlf_config[enabled_languages][]" value="<?php echo $lang; ?>" <?php if (in_array($lang, $mlf_config['enabled_languages'])) echo 'checked'; ?> >
+                            </td>
+                            <td><?php echo $name; ?></td>
+                            <td><input type="text" name="mlf_config[labels][not_available][<?php echo $lang; ?>]" value="<?php echo htmlspecialchars($mlf_config['labels']['not_available'][$lang]); ?>"></td>
+                            <td><input type="text" name="mlf_config[labels][available][<?php echo $lang; ?>]" value="<?php echo htmlspecialchars($mlf_config['labels']['available'][$lang]); ?>"></td>
+                        </tr>
+                    
+                    <?php endforeach; ?>
+                    </table>
+                    
+                <input type="hidden" name="mlf_config[hide_default_language]" value="1">
+                
+				<p class="submit">
+				<input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
+				</p>
+			
+			
+			</form>
+		
+		
+		</div>
         
-            <p class="submit">
-                <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
-            </p>   
-            </form>  
-        </div> 
-        -->
-<?php
+        <?php
+    
 }
+
 ?>

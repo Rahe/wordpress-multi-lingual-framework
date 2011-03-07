@@ -6,71 +6,66 @@ add_action('init', 'post_translations_init');
 
 // Creates a post type for each language
 function post_translations_init() {
-    global $langs;
    
-    $language_name = mlf_get_option('language_name');
-    $enabled_languages = mlf_get_option('enabled_languages');
-    $default_language = mlf_get_option('default_language');
-
-    $labels = array(
-        'name' => _x('Post Translations', 'post type general name'),
-        'singular_name' => _x('Post Translation', 'post type singular name'),
-        'add_new' => _x('Add New','mlf'),
-        'add_new_item' => __('Add New Translation'),
-        'edit_item' => __('Edit Translation'),
-        'new_item' => __('New Translation'),
-        'view_item' => __('View Translation'),
-        'search_items' => __('Search Translations'),
-        'not_found' =>  __('No translations found'),
-        'not_found_in_trash' => __('No translations found in Trash'), 
-        'parent_item_colon' => ''
-    );
-    $args = array(
-        'labels' => $labels,
-        'public' => true,
-        'rewrite' => false,
-        'capability_type' => 'post',
-        'hierarchical' => false,
-        'menu_position' => 5,
-        'supports' => array('title','editor','author','thumbnail','excerpt','comments')
-    ); 
+    global $wp_post_types, $mlf_config;
+    
+    $language_name = $mlf_config['language_name'];
+    $enabled_languages = $mlf_config['enabled_languages'];
+    $default_language = $mlf_config['default_language'];
     
     foreach ($enabled_languages as $l) {
         
         if ($l == $default_language)
             continue;
-        
-        $labels = array(
-            'name' => _x('Posts - ' . $language_name[$l], 'post type general name'),
-            'singular_name' => _x('Post - ' . $l, 'post type singular name'),
-            'add_new' => __('Add New', 'mlf'),
-            'add_new_item' => __('Add New Translation', 'mlf'),
-            'edit_item' => __('Edit Translation','mlf'),
-            'new_item' => __('New Translation', 'mlf'),
-            'view_item' => __('View Translation', 'mlf'),
-            'search_items' => __('Search Translations', 'mlf'),
-            'not_found' =>  __('No translations found', 'mlf'),
-            'not_found_in_trash' => __('No translations found in Trash', 'mlf'), 
-            'parent_item_colon' => ''
-        );
-        $args = array(
-            'labels' => $labels,
-            'public' => true,
-            'rewrite' => array('slug' => $l),
-            'capability_type' => 'post',
-            'hierarchical' => false,
-            'menu_position' => 5,
-            'supports' => array('title','editor','author','thumbnail','excerpt','comments')
-        ); 
-        register_post_type('post_translations_' . $l, $args);
+        //var_dump($mlf_config['post_types']);
+        foreach ($mlf_config['post_types'] as $p_type) {
+            
+            $labels = (array) $wp_post_types[$p_type]->labels;
+            $labels['name'] .= ' - ' . $language_name[$l];
+            
+            switch ($p_type) {
+            
+                case 'post':
+                    $menu_pos = 5;
+                    break;
+                case 'page':
+                    $menu_pos = 20;
+                    break;
+                default:
+                    $menu_pos = $wp_post_types[$p_type]->menu_position ? $wp_post_types[$p_type]->menu_position : 25;
+            
+            }
+            
+            $args = array(
+                'labels' => $labels,
+                'public' => true,
+                'rewrite' => array('slug' => $l),
+                'capability_type' => $wp_post_types[$p_type]->capability_type,
+                'hierarchical' => $wp_post_types[$p_type]->hierarchical == 1,
+                'menu_position' => $menu_pos,
+                'supports' => array('title','editor','author','thumbnail','excerpt','comments')
+            ); 
+            register_post_type($p_type . '_translations_' . $l, $args);
+            
+        }
     }
+    
+    // Adds the Translation Column to the Edit screen
+    
+    add_filter("manage_posts_columns", '_post_translations_add_column');
+    
+    add_action("manage_posts_custom_column", 'post_translations_add_column', 10, 2);
+    add_action("manage_pages_custom_column", 'post_translations_add_column', 10, 2);
+    
+    add_action('admin_menu', 'post_translation_box');
+    
+    foreach ($mlf_config['post_types'] as $p_type) {
+        add_filter("manage_{$p_type}_posts_columns", '_post_translations_add_column');
+        add_action("save_$p_type", 'post_translation_save');
+    }
+    
+    
 }
-
-
-// Adds the Translation Column to the Edit screen
-
-add_action('manage_posts_custom_column', 'post_translations_add_column', 10, 2);
-add_filter('manage_posts_columns', '_post_translations_add_column');
 
 function _post_translations_add_column($defaults) {
     global $pagenow;
@@ -93,7 +88,7 @@ function _post_translations_add_column($defaults) {
 function post_translations_add_column($column_name, $id) {
     
     if ($column_name=="post_translations") {
-        global $wpdb, $plugin_url;
+        global $wpdb;
         
         $enabled_languages = mlf_get_option('enabled_languages');
         $default_language = mlf_get_option('default_language');
@@ -106,15 +101,16 @@ function post_translations_add_column($column_name, $id) {
         if ($post_type == '' && DOING_AJAX) 
             $post_type = $_POST['post_type'];
         
+        $post_type_base = preg_replace('/^(\S+)_translations_\S{2}$/', "$1", $post_type);
         
         foreach ($enabled_languages as $lang) {
             
             $translation_id = false;
-            $p_type = 'post_translations_' . $lang;            
-            $flag_img = $plugin_url . $flag_location . $flag[$lang];
+            $p_type = $post_type_base . '_translations_' . $lang;            
+            $flag_img = MLF_PLUGIN_URL . $flag_location . $flag[$lang];
             
-            if ($p_type == 'post_translations_' . $default_language)
-                $p_type = 'post';
+            if ($p_type == $post_type_base . '_translations_' . $default_language)
+                $p_type = $post_type_base;
 
             if ( $post_type == $p_type ) {
                 continue;
@@ -133,17 +129,21 @@ function post_translations_add_column($column_name, $id) {
     }
 }
 
-add_action('admin_menu', 'post_translation_box');
-add_action('save_post', 'post_translation_save');
-
 function post_translation_box() {
     $enabled_languages = mlf_get_option('enabled_languages');
+    $post_types = mlf_get_option('post_types');
     
-    add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', 'post', 'side' );
+    foreach ($post_types as $p) {
     
-    foreach ($enabled_languages as $lang) {
-        add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', 'post_translations_' . $lang, 'side' );
+        add_meta_box( 'post_translations',__('Post Translations', 'mlf'), 'post_translation_inner_box', $p, 'side' );
+        
+        foreach ($enabled_languages as $lang) {
+            add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', $p . '_translations_' . $lang, 'side' );
+        }
+    
     }
+    
+    
 }
    
 
@@ -166,7 +166,7 @@ function post_translation_inner_box() {
     echo '<input type="hidden" name="_translation_of" value="' . $translation_of . '" >';
     
     
-    global $wpdb, $plugin_url;
+    global $wpdb;
     
     $default_language = mlf_get_option('default_language');
     $enabled_languages = mlf_get_option('enabled_languages');
@@ -178,17 +178,19 @@ function post_translation_inner_box() {
     }
     
     $post_type = $post->post_type;
+    $post_type_base = preg_replace('/^(\S+)_translations_\S{2}$/', "$1", $post->post_type);
+    
     $flag_location = mlf_get_option('flag_location');
     $flag = mlf_get_option('flag');   
     
     foreach ($enabled_languages as $lang) {
         
         $translation_id = false;
-        $p_type = 'post_translations_' . $lang;            
-        $flag_img = $plugin_url . $flag_location . $flag[$lang];
+        $p_type = $post_type_base . '_translations_' . $lang;            
+        $flag_img = MLF_PLUGIN_URL . $flag_location . $flag[$lang];
         
-        if ($p_type == 'post_translations_' . $default_language)
-            $p_type = 'post';
+        if ($p_type == $post_type_base . '_translations_' . $default_language)
+            $p_type = $post_type_base;
 
         if ( $post_type == $p_type ) {
             continue;
@@ -196,7 +198,7 @@ function post_translation_inner_box() {
         
         
         
-        #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$id ";
+        #echo "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ";
         
         if ($translation_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value={$post->ID} ")) {                
             echo "<a title='Edit' href='post.php?action=edit&post=$translation_id'><span class='icon_edit'><span>edit</span></span> <img src='$flag_img'/></a> ";
@@ -293,6 +295,7 @@ function post_translation_save( $post_id ) {
 }
 
 add_action('post_submitbox_misc_actions', 'mlf_copy_date_checkbox');
+add_action('page_submitbox_misc_actions', 'mlf_copy_date_checkbox');
 
 function mlf_copy_date_checkbox() {
     global $pagenow;
@@ -320,7 +323,7 @@ function mlf_other_versions_add_box() {
 }
 
 function mlf_other_versions_box(){
-    global $post, $plugin_url;
+    global $post;
 
     $default_language = mlf_get_option('default_language');
     $flag_location = mlf_get_option('flag_location');
@@ -352,7 +355,7 @@ function mlf_other_versions_box(){
             <ul class="translation_tabs">
                 <?php
                     foreach ($translation_version as $lang => $text){
-                        $flag_img = $plugin_url . $flag_location . $flag[$lang];
+                        $flag_img = MLF_PLUGIN_URL . $flag_location . $flag[$lang];
                         echo '<li class="' . $class . '"><a href="#post_translation_'. $lang . '"><img src="' . $flag_img . '"></a></li>';
                     }
                  ?>

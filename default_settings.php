@@ -1,16 +1,7 @@
 <?php
 
-function create_default_settings(){
+function mlf_load_static_options() {
     
-    $plugin_prefix = 'mlf_';
-    
-    // automatically update .mo files
-    $mlf_config['auto_update_mo'] = true;
-/*
-    $mlf_config['basepath'] = WP_PLUGIN_DIR . '/' . $plugin_folder . '/';
-    $mlf_config['baseurl']  = WP_CONTENT_URL . '/plugins/'. $plugin_folder .'/'; 
-    
-*/
     $mlf_config['locale']['de'] = "de_DE";
     $mlf_config['locale']['en'] = "en_US";
     $mlf_config['locale']['zh'] = "zh_CN";
@@ -230,7 +221,13 @@ function create_default_settings(){
 
     // Location of flags (needs trailing slash!)
     $mlf_config['flag_location'] =  "/flags/";
+    
+    return $mlf_config;
+    
+}
 
+function create_default_settings(){
+   
     // enable the use of following languages (order=>language)
     $mlf_config['enabled_languages'] = array(
         '0' => 'pt',
@@ -243,10 +240,15 @@ function create_default_settings(){
     $mlf_config['default_language'] =  "pt";
     
     $mlf_config['url_mode'] =  "path";
+    
+    $mlf_config['post_types'] =  array('post');
 
+    /*
     foreach ($mlf_config as $name => $value){
         update_option( $plugin_prefix . $name, $value);
-    }    
+    } 
+    * */
+    update_option('mlf_config', $mlf_config);   
 
 }
 ?>
