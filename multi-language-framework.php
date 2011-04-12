@@ -177,7 +177,7 @@ add_filter('the_permalink',					'mlf_convertURL');
 add_filter('feed_link',						'mlf_convertURL');
 add_filter('post_comments_feed_link',		'mlf_convertURL');
 add_filter('tag_feed_link',					'mlf_convertURL');
-add_filter('clean_url',						'mlf_convertURL');
+//add_filter('clean_url',						'mlf_convertURL');
 
 
 ?>
