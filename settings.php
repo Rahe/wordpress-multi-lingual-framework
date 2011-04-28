@@ -39,7 +39,7 @@ function mlf_page_admin() {
                 
                     <?php foreach ($wp_post_types as $type_name => $type) : ?>
                         
-                        <?php if ($type_name == 'attachment' || $type_name == 'revision' || $type_name == 'nav_menu_item' || preg_match('/_translations_/', $type_name)) continue; ?>
+                        <?php if ($type_name == 'attachment' || $type_name == 'revision' || $type_name == 'nav_menu_item' || preg_match('/_t_/', $type_name)) continue; ?>
                     
                         <input type="checkbox" name="mlf_config[post_types][]" value="<?php echo $type_name; ?>" <?php if (in_array($type_name, $mlf_config['post_types'])) echo 'checked'; ?> > <?php echo $type_name; ?> <br />
                     

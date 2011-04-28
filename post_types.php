@@ -22,6 +22,7 @@ function post_translations_init() {
             
             $labels = (array) $wp_post_types[$p_type]->labels;
             $labels['name'] .= ' - ' . $language_name[$l];
+            $labels['menu_name'] .= ' - ' . $language_name[$l];
             
             switch ($p_type) {
             
@@ -45,7 +46,10 @@ function post_translations_init() {
                 'menu_position' => $menu_pos,
                 'supports' => array('title','editor','author','thumbnail','excerpt','comments')
             ); 
-            register_post_type($p_type . '_translations_' . $l, $args);
+            
+            //TODO: Post types names can only have 20 chars. Ho to deal with it?
+            
+            register_post_type($p_type . '_t_' . $l, $args);
             
         }
     }
@@ -101,15 +105,15 @@ function post_translations_add_column($column_name, $id) {
         if ($post_type == '' && DOING_AJAX) 
             $post_type = $_POST['post_type'];
         
-        $post_type_base = preg_replace('/^(\S+)_translations_\S{2}$/', "$1", $post_type);
+        $post_type_base = preg_replace('/^(\S+)_t_\S{2}$/', "$1", $post_type);
         
         foreach ($enabled_languages as $lang) {
             
             $translation_id = false;
-            $p_type = $post_type_base . '_translations_' . $lang;            
+            $p_type = $post_type_base . '_t_' . $lang;            
             $flag_img = MLF_PLUGIN_URL . $flag_location . $flag[$lang];
             
-            if ($p_type == $post_type_base . '_translations_' . $default_language)
+            if ($p_type == $post_type_base . '_t_' . $default_language)
                 $p_type = $post_type_base;
 
             if ( $post_type == $p_type ) {
@@ -139,8 +143,8 @@ function post_translation_box() {
         add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', $p, 'normal', 'high' );
         
         foreach ($enabled_languages as $lang) {
-            add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', $p . '_translations_' . $lang, 'side' );
-            add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', $p . '_translations_' . $lang, 'normal', 'high' );
+            add_meta_box( 'post_translations',__('Post Translations', 'mlf'),'post_translation_inner_box', $p . '_t_' . $lang, 'side' );
+            add_meta_box( 'mlf_other_version_id',__('Post Translations', 'mlf'),'mlf_other_versions_box', $p . '_t_' . $lang, 'normal', 'high' );
         }
     
     }
@@ -180,7 +184,7 @@ function post_translation_inner_box() {
     }
     
     $post_type = $post->post_type;
-    $post_type_base = preg_replace('/^(\S+)_translations_\S{2}$/', "$1", $post->post_type);
+    $post_type_base = preg_replace('/^(\S+)_t_\S{2}$/', "$1", $post->post_type);
     
     $flag_location = mlf_get_option('flag_location');
     $flag = mlf_get_option('flag');   
@@ -188,10 +192,10 @@ function post_translation_inner_box() {
     foreach ($enabled_languages as $lang) {
         
         $translation_id = false;
-        $p_type = $post_type_base . '_translations_' . $lang;            
+        $p_type = $post_type_base . '_t_' . $lang;            
         $flag_img = MLF_PLUGIN_URL . $flag_location . $flag[$lang];
         
-        if ($p_type == $post_type_base . '_translations_' . $default_language)
+        if ($p_type == $post_type_base . '_t_' . $default_language)
             $p_type = $post_type_base;
 
         if ( $post_type == $p_type ) {
@@ -328,8 +332,8 @@ function mlf_other_versions_box(){
         while ( $posts->have_posts() ){
             $posts->the_post();
             
-            if (preg_match('/^\S+_translations_(\S{2})$/', $post->post_type))
-                $lang = preg_replace('/^\S+_translations_(\S{2})$/', "$1", $post->post_type);
+            if (preg_match('/^\S+_t_(\S{2})$/', $post->post_type))
+                $lang = preg_replace('/^\S+_t_(\S{2})$/', "$1", $post->post_type);
             else
                 $lang = $default_language;
                 

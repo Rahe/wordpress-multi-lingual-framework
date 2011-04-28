@@ -28,7 +28,7 @@ function mlf_parse_query($wp_query) {
         
         $post_type = $wp_query->query_vars['post_type'] ? $wp_query->query_vars['post_type'] : 'post';
                 
-        $wp_query->query_vars['post_type'] = $post_type . '_translations_' . $mlf_config['current_language'];
+        $wp_query->query_vars['post_type'] = $post_type . '_t_' . $mlf_config['current_language'];
     
     } else {
         
@@ -41,7 +41,7 @@ function mlf_parse_query($wp_query) {
             $post_type = $wpdb->get_var( $wpdb->prepare("SELECT post_type FROM $wpdb->posts WHERE post_name = %s", $wp_query->query_vars['pagename']) );
             
             $wp_query->query_vars['post_type'] = $post_type;
-            //$wp_query->query_vars['post_type'] = $post_type . '_translations_' . $mlf_config['current_language'];
+            //$wp_query->query_vars['post_type'] = $post_type . '_t_' . $mlf_config['current_language'];
             $wp_query->query_vars['name'] = $wp_query->query_vars['pagename'];
             $wp_query->query_vars[$wp_query->query_vars['post_type']] =  $wp_query->query_vars['name'];
             $wp_query->query_vars['pagename'] = '';            
@@ -50,7 +50,7 @@ function mlf_parse_query($wp_query) {
             $wp_query->query = array(
             
                 'post_type' => $post_type,
-                //'post_type' => $post_type . '_translations_' . $mlf_config['current_language'],
+                //'post_type' => $post_type . '_t_' . $mlf_config['current_language'],
                 'name' => $wp_query->query_vars['pagename'],
                 $wp_query->query_vars['post_type'] => $wp_query->query_vars['name']
                 
@@ -75,10 +75,10 @@ function mlf_single_translation() {
     
         global $wpdb, $mlf_config;
         $post = $wp_query->post;
-        $post_type = preg_replace('/(.+)_translations_([a-zA-Z]{2})/', "$1", $post->post_type);
+        $post_type = preg_replace('/(.+)_t_([a-zA-Z]{2})/', "$1", $post->post_type);
         
-        if (preg_match('/(.+)_translations_([a-zA-Z]{2})/', $post->post_type))
-            $post_lang = preg_replace('/(.+)_translations_([a-zA-Z]{2})/', "$2", $post->post_type);
+        if (preg_match('/(.+)_t_([a-zA-Z]{2})/', $post->post_type))
+            $post_lang = preg_replace('/(.+)_t_([a-zA-Z]{2})/', "$2", $post->post_type);
         else
             $post_lang = $default_language;
         
@@ -87,7 +87,7 @@ function mlf_single_translation() {
         if ($post_lang == $mlf_config['current_language'])
             return;
         
-        $post_type_search = $default_language == $mlf_config['current_language'] ? $post_type : $post_type . "_translations_" . $mlf_config['current_language'];
+        $post_type_search = $default_language == $mlf_config['current_language'] ? $post_type : $post_type . "_t_" . $mlf_config['current_language'];
         
         $query = "select * from $wpdb->posts join $wpdb->postmeta on ID = post_id WHERE post_type = '$post_type_search' 
                 AND meta_key = '_translation_of' AND meta_value = $post->ID";

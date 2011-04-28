@@ -300,7 +300,7 @@ function mlf_get_tranlsations_ids($post_id, $post_type = 'post') {
     
     global $wpdb;
     
-    $post_type_base = preg_replace('/(.+)_translations_([a-zA-Z]{2})/', "$1", $post_type);
+    $post_type_base = preg_replace('/(.+)_t_([a-zA-Z]{2})/', "$1", $post_type);
     
     $enabled_languages = mlf_get_option('enabled_languages');
     $default_language = mlf_get_option('default_language');
@@ -309,9 +309,9 @@ function mlf_get_tranlsations_ids($post_id, $post_type = 'post') {
     foreach ($enabled_languages as $lang) {
             
         $translation_id = false;
-        $p_type = $post_type_base . '_translations_' . $lang;            
+        $p_type = $post_type_base . '_t_' . $lang;            
         
-        if ($p_type == $post_type_base . '_translations_' . $default_language)
+        if ($p_type == $post_type_base . '_t_' . $default_language)
             $p_type = $post_type_base;
 
         if ( $post_type == $p_type ) {
@@ -344,18 +344,66 @@ function mlf_links_to_languages() {
     $originalLanguage = $mlf_config['current_language'];
     
     echo '<ul id="languages_list">';
-    foreach ($mlf_config['enabled_languages'] as $lang) {
-        $mlf_config['current_language'] = $lang;
-        $flag_img = MLF_PLUGIN_URL . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
-        ?>
-        <li>
-            <a href="<?php echo mlf_convertURL(); ?>">
-                <img src="<?php echo $flag_img; ?>" />
-                <?php echo $mlf_config['language_name'][$lang]; ?>
-            </a>
-        </li>
-        <?php
+    
+    if (is_singular()) {
+    
+        global $wp_query;
+        $post = $wp_query->get_queried_object();
+        $other_languages = mlf_get_tranlsations_ids($post->ID, $post->post_type);
+        
+        foreach ($mlf_config['enabled_languages'] as $lang) {
+            
+            if ($originalLanguage == $lang)
+                continue;
+            
+            $flag_img = MLF_PLUGIN_URL . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
+            
+            // does this entry have a translation?
+            if ($other_languages[$lang]) {
+                // We have to temporarily change the language to retrieve unflitered permalinks
+                $mlf_config['current_language'] = $mlf_config['default_language'];
+                $link = get_permalink($other_languages[$lang]);
+            } else {
+                $mlf_config['current_language'] = $lang;
+                $link = mlf_convertURL();
+            }
+
+            ?>
+            <li>
+                <a href="<?php echo $link; ?>">
+                    <img src="<?php echo $flag_img; ?>" />
+                    <?php echo $mlf_config['language_name'][$lang]; ?>
+                </a>
+            </li>
+            <?php
+            
+        }
+    
+    
+    } else {
+    
+    
+        foreach ($mlf_config['enabled_languages'] as $lang) {
+        
+            if ($originalLanguage == $lang)
+                continue;
+            
+            $mlf_config['current_language'] = $lang;
+            $flag_img = MLF_PLUGIN_URL . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
+            ?>
+            <li>
+                <a href="<?php echo mlf_convertURL(); ?>">
+                    <img src="<?php echo $flag_img; ?>" />
+                    <?php echo $mlf_config['language_name'][$lang]; ?>
+                </a>
+            </li>
+            <?php
+            
+        }
+        
+    
     }
+    
     echo '</ul>';
     
     $mlf_config['current_language'] = $originalLanguage;
