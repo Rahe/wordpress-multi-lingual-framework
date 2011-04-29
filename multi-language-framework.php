@@ -58,12 +58,13 @@ function mlf_init() {
     // load plugin translations
     //load_plugin_textdomain('mlf', false, dirname(plugin_basename( __FILE__ )).'/languages');
     
-    // register plugin javascript files
-    mlf_add_js();
-    
-    // register plugin css files
-    mlf_add_css();
-    
+    if (is_admin()) {
+        // register plugin javascript files
+        mlf_add_js();
+        
+        // register plugin css files
+        mlf_add_css();
+    }    
         
     // remove traces of language (or better not?)
 	//unset($_GET['lang']);
@@ -124,7 +125,6 @@ function mlf_admin_menu() {
 }
 
 function mlf_add_js() {
-
     
     wp_enqueue_script('mlf-admin', MLF_PLUGIN_URL . 'js/settings.js');    
 }
