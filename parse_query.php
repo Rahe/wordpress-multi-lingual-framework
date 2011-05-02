@@ -27,8 +27,9 @@ function mlf_parse_query($wp_query) {
             return;
         
         $post_type = $wp_query->query_vars['post_type'] ? $wp_query->query_vars['post_type'] : 'post';
-                
-        $wp_query->query_vars['post_type'] = $post_type . '_t_' . $mlf_config['current_language'];
+        
+        if ($post_type != 'nav_menu_item' && $post_type != 'attachment')
+            $wp_query->query_vars['post_type'] = $post_type . '_t_' . $mlf_config['current_language'];
     
     } else {
         
