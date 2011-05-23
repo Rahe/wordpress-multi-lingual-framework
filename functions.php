@@ -243,7 +243,7 @@ function mlf_add_link_to_other_languages($content) {
     $currentLanguage = $mlf_config['current_language'];
     $mlf_config['current_language'] = $mlf_config['default_language'];
     
-    $r .= '<div id="postmeta_translations"><ul>';
+    $r .= '<ul id="postmeta_translations">';
 
     foreach($other_languages as $lang => $l) {
         
@@ -253,7 +253,7 @@ function mlf_add_link_to_other_languages($content) {
         }
     }
 
-    $r .= '</ul></div>';
+    $r .= '</ul>';
 
     //restore language
     $mlf_config['current_language'] = $currentLanguage;
@@ -332,7 +332,7 @@ function mlf_add_not_available_message($content) {
     
     $message = $mlf_config['labels']['not_available'][$mlf_config['current_language']] ? $mlf_config['labels']['not_available'][$mlf_config['current_language']] : sprintf(__('This entry is not available in %s','mlf'), $mlf_config['language_name'][$mlf_config['current_language']]);
     
-    return "<div class='mlf_alert'>$message</div>$content";
+    return "<p class='mlf_alert'>$message</p>$content";
 
 }
 
