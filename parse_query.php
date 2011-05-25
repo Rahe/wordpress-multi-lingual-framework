@@ -45,7 +45,9 @@ function mlf_parse_query($wp_query) {
             //$wp_query->query_vars['post_type'] = $post_type . '_t_' . $mlf_config['current_language'];
             $wp_query->query_vars['name'] = $wp_query->query_vars['pagename'];
             $wp_query->query_vars[$wp_query->query_vars['post_type']] =  $wp_query->query_vars['name'];
-            $wp_query->query_vars['pagename'] = '';            
+            $wp_query->query_vars['pagename'] = '';
+            $wp_query->is_page = false;
+            $wp_query->is_single = true;
 
 
             $wp_query->query = array(
@@ -57,6 +59,8 @@ function mlf_parse_query($wp_query) {
                 
             );
             
+            // Lets add the template for the original post type in the template hierarchy of this post.
+            add_filter('single_template', 'mlf_add_single_template');
             
         }
         
@@ -65,6 +69,24 @@ function mlf_parse_query($wp_query) {
     
     }
     
+}
+
+function mlf_add_single_template($templates) {
+
+    global $wp_query;
+    
+    $post_type = $wp_query->query_vars['post_type'];
+    
+    if (preg_match('/(.+)_t_([a-zA-Z]{2})/', $post_type))
+        $orig_post_type = preg_replace('/(.+)_t_([a-zA-Z]{2})/', "$1", $post_type);
+    
+    $new_templates = array();
+    $new_templates[] = "single-$post_type.php";
+    $new_templates[] = "single-$orig_post_type.php";
+    $new_templates[] = 'single.php';
+
+    return locate_template($new_templates);
+
 }
 
 function mlf_single_translation() {
