@@ -1,0 +1,126 @@
+# Translation of the WordPress plugin Multi Language Framework 0.1 by BIREME, LeoGermani.
+# Copyright (C) 2010 BIREME, LeoGermani
+# This file is distributed under the same license as the Multi Language Framework package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Multi Language Framework 0.1\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/multi-language-framework\n"
+"POT-Creation-Date: 2010-08-30 15:33-0300\n"
+"PO-Revision-Date: 2011-08-19 09:27-0300\n"
+"Last-Translator: Paulo Calixto <paulinho.calixto@hotmail.com>\n"
+"Language-Team: Paulo Eduardo Calixto <paulinho.calixto@hotmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Spanish\n"
+"X-Poedit-Country: SPAIN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: edit_screen.php:37
+msgctxt "post type general name"
+msgid "Post Translations"
+msgstr "Entrada Traducciones"
+
+#: edit_screen.php:38
+msgctxt "post type singular name"
+msgid "Post Translation"
+msgstr "Entrada Traducción"
+
+#: edit_screen.php:39
+#: edit_screen.php:64
+msgctxt "book"
+msgid "Add New"
+msgstr "Añadir Nueva"
+
+#: edit_screen.php:40
+#: edit_screen.php:65
+msgid "Add New Translation"
+msgstr "Añadir Nueva Traducción"
+
+#: edit_screen.php:41
+#: edit_screen.php:66
+msgid "Edit Translation"
+msgstr "Editar Traducción"
+
+#: edit_screen.php:42
+#: edit_screen.php:67
+msgid "New Translation"
+msgstr "Nueva Traducción"
+
+#: edit_screen.php:43
+#: edit_screen.php:68
+msgid "View Translation"
+msgstr "Ver Traducción"
+
+#: edit_screen.php:44
+#: edit_screen.php:69
+msgid "Search Translations"
+msgstr "Buscar Traducciones"
+
+#: edit_screen.php:45
+#: edit_screen.php:70
+msgid "No translations found"
+msgstr "No se encontraron traducciones"
+
+#: edit_screen.php:46
+#: edit_screen.php:71
+msgid "No translations found in Trash"
+msgstr "No se encontraron traducciones en la papelera"
+
+#: edit_screen.php:62
+msgctxt "post type general name"
+msgid "Posts - "
+msgstr "Entradas - "
+
+#: edit_screen.php:63
+msgctxt "post type singular name"
+msgid "Post - "
+msgstr "Entrada - "
+
+#: edit_screen.php:103
+msgid "Translations"
+msgstr "Traducciones"
+
+#: edit_screen.php:146
+#: edit_screen.php:149
+msgid "Post Translations"
+msgstr "Entrada Traducciones"
+
+#: edit_screen.php:170
+msgid "Save this post so you can add and edit translations"
+msgstr "Guardar esta entrada antes de que puedes añadir o editar las traducciones"
+
+#: multi-language-framework.php:65
+msgid "Multi Language Settings"
+msgstr "Multi Idiomas Configuración"
+
+#: settings.php:7
+msgid "Multi Language Framework Configuration"
+msgstr "Multi Language Framework Cinfiguración"
+
+#: settings.php:8
+msgid "On this page, you will configure all the aspects of this plugins"
+msgstr "En esta página, puede editar todas las características de este plugin"
+
+#: settings.php:10
+msgid "Default language:"
+msgstr "Lenguaje por Defecto"
+
+#. Plugin Name of the plugin/theme
+msgid "Multi Language Framework"
+msgstr "Multi Language Framework"
+
+#. Plugin URI of the plugin/theme
+msgid "http://reddes.bvsalud.org/projects/multi-language-framework/"
+msgstr "http://reddes.bvsalud.org/projects/multi-language-framework/"
+
+#. Description of the plugin/theme
+msgid "Handles creation of multilingual content."
+msgstr "Funciona con la creación de contenido multilingüe"
+
+#. Author of the plugin/theme
+msgid "BIREME, LeoGermani"
+msgstr "BIREME, LeoGermani, PauloKlixto"
+
