@@ -28,12 +28,15 @@ function post_translations_init() {
             
                 case 'post':
                     $menu_pos = 5;
+                    $p_type_supports = array('title','editor','author','thumbnail','excerpt','comments');
                     break;
                 case 'page':
                     $menu_pos = 20;
+                    $p_type_supports = array('title','editor','author','thumbnail','excerpt','comments', 'page-attributes');
                     break;
                 default:
                     $menu_pos = $wp_post_types[$p_type]->menu_position ? $wp_post_types[$p_type]->menu_position : 25;
+                    $p_type_supports = array('title','editor','author','thumbnail','excerpt','comments');
             
             }
             
@@ -44,7 +47,7 @@ function post_translations_init() {
                 'capability_type' => $wp_post_types[$p_type]->capability_type,
                 'hierarchical' => $wp_post_types[$p_type]->hierarchical == 1,
                 'menu_position' => $menu_pos,
-                'supports' => array('title','editor','author','thumbnail','excerpt','comments')
+                'supports' => $p_type_supports
             ); 
             
             //TODO: Post types names can only have 20 chars. Ho to deal with it?
@@ -163,9 +166,7 @@ function post_translation_inner_box() {
     if ($_GET['action'] != 'edit') {
         $translation_of = $_GET['translation_of'];
     } else {
-        $translation_of = get_post_meta($post->ID, '_translation_of');
-        if (is_array($translation_of))
-            $translation_of = $translation_of[0];
+        $translation_of = get_post_meta($post->ID, '_translation_of', true);
     }
     
     
@@ -241,9 +242,9 @@ function mlf_add_translation_relationship($original, $new) {
     mlf_add_post_meta($new, '_translation_of', $original);
     
     #var_dump($original, $new); die;
-    
+
     $also_translation_of = get_post_meta($original, '_translation_of');
-    
+
     if (is_array($also_translation_of)) {
         foreach ($also_translation_of as $a) {
             if ($a != $new) {
@@ -267,11 +268,8 @@ function post_translation_save( $post_id ) {
     if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) 
         return $post_id;
 
-    if ( 'post' == $_POST['post_type'] ) {
-        if ( !current_user_can( 'edit_post', $post_id ) )
-            return $post_id;
-    }
     
+
     #var_dump($_POST['_translation_of']); die;
     
     mlf_add_translation_relationship($_POST['_translation_of'], $post_id);

@@ -37,15 +37,19 @@ function mlf_parse_query($wp_query) {
         // because we changed the REQUEST_URI so it doesnt know
         if ($wp_query->query_vars['pagename']) {
             
+            //lets check if there are slashes in the page name, that means a child
+            $pagename = $wp_query->query_vars['pagename'];
+            $pagename = str_replace( dirname($pagename) . '/', '', $pagename);
+            
             global $wpdb;
             
-            $post_type = $wpdb->get_var( $wpdb->prepare("SELECT post_type FROM $wpdb->posts WHERE post_name = %s", $wp_query->query_vars['pagename']) );
+            $post_type = $wpdb->get_var( $wpdb->prepare("SELECT post_type FROM $wpdb->posts WHERE post_name = %s", $pagename) );
             
             $wp_query->query_vars['post_type'] = $post_type;
             //$wp_query->query_vars['post_type'] = $post_type . '_t_' . $mlf_config['current_language'];
-            $wp_query->query_vars['name'] = $wp_query->query_vars['pagename'];
+            $wp_query->query_vars['name'] = $pagename;
             $wp_query->query_vars[$wp_query->query_vars['post_type']] =  $wp_query->query_vars['name'];
-            $wp_query->query_vars['pagename'] = '';
+            $pagename = '';
             $wp_query->is_page = false;
             $wp_query->is_single = true;
 
@@ -54,7 +58,7 @@ function mlf_parse_query($wp_query) {
             
                 'post_type' => $post_type,
                 //'post_type' => $post_type . '_t_' . $mlf_config['current_language'],
-                'name' => $wp_query->query_vars['pagename'],
+                'name' => $pagename,
                 $wp_query->query_vars['post_type'] => $wp_query->query_vars['name']
                 
             );
