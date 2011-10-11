@@ -1,199 +1,198 @@
 .mlf_wrap{
-    width:740px;
+	width:740px;
 }
 
 .mlf_section{
-    border:1px solid #ddd;
-    border-bottom:0;
-    background:#f9f9f9;
+	border:1px solid #ddd;
+	border-bottom:0;
+	background:#f9f9f9;
 }
 
 .mlf_opts label{
-    font-size:12px;
-    font-weight:700;
-    width:200px;
-    display:block;
-    float:left; 
+	font-size:12px;
+	font-weight:700;
+	width:200px;
+	display:block;
+	float:left; 
 }
 .mlf_input {
-    padding:30px 10px;
-    border-bottom:1px solid #ddd;
-    border-top:1px solid #fff;
+	padding:30px 10px;
+	border-bottom:1px solid #ddd;
+	border-top:1px solid #fff;
 }
 .mlf_opts small{
-    display:block;
-    float:right;
-    width:200px;
-    color:#999;
+	display:block;
+	float:right;
+	width:200px;
+	color:#999;
 }
 .mlf_opts input[type="text"], .mlf_opts select{
-    width:280px;
-    font-size:12px;
-    padding:4px;
-    color:#333;
-    line-height:1em;
-    background:#f3f3f3;
+	width:280px;
+	font-size:12px;
+	padding:4px;
+	color:#333;
+	line-height:1em;
+	background:#f3f3f3;
 }
 .mlf_input input:focus, .mlf_input textarea:focus{
-        background:#fff;
+		background:#fff;
 }
 .mlf_input textarea{
-    width:280px;
-    height:175px;
-    font-size:12px;
-    padding:4px;
-    color:#333;
-    line-height:1.5em;
-    background:#f3f3f3;
+	width:280px;
+	height:175px;
+	font-size:12px;
+	padding:4px;
+	color:#333;
+	line-height:1.5em;
+	background:#f3f3f3;
 }
 .mlf_title h3 {
-    cursor:pointer;
-    font-size:1em;
-    text-transform: uppercase;
-    margin:0;
-    font-weight:bold;
-    color:#232323;
-    float:left;
-    width:80%;
-    padding:14px 4px;
+	cursor:pointer;
+	font-size:1em;
+	text-transform: uppercase;
+	margin:0;
+	font-weight:bold;
+	color:#232323;
+	float:left;
+	width:80%;
+	padding:14px 4px;
 }
 
 .mlf_title{
-    cursor:pointer;
-    border-bottom:1px solid #ddd;
-    background:#eee;
-    padding:0;
-    }
+	cursor:pointer;
+	border-bottom:1px solid #ddd;
+	background:#eee;
+	padding:0;
+	}
 
 .mlf_title h3 img.inactive{
-    margin:-8px 10px 0 2px;
-    width:32px;
-    height:32px;    
-    background:url('../images/pointer.png') no-repeat 0 0;
-    float:left;
-    -moz-border-radius:6px;
-    border:1px solid #ccc;
+	margin:-8px 10px 0 2px;
+	width:32px;
+	height:32px;	
+	background:url('../images/pointer.png') no-repeat 0 0;
+	float:left;
+	-moz-border-radius:6px;
+	border:1px solid #ccc;
 }
 
 .mlf_title h3 img.active{
-    margin:-8px 10px 0 2px;
-    width:32px;
-    height:32px;    
-    background:url('../images/pointer.png') no-repeat  0 -32px;
-    float:left;
-    -moz-border-radius:6px;
-    -webkit-border-radius:6px;
-    border:1px solid #ccc;
+	margin:-8px 10px 0 2px;
+	width:32px;
+	height:32px;	
+	background:url('../images/pointer.png') no-repeat  0 -32px;
+	float:left;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border:1px solid #ccc;
 }
-        
+		
 .mlf_title h3:hover img{
-    border:1px solid #999;
+	border:1px solid #999;
 }
 
 .mlf_title span.submit{
-    display:block;
-    float:right;
-    margin:0;
-    padding:0;
-    width:15%;
-    padding:14px 0;
+	display:block;
+	float:right;
+	margin:0;
+	padding:0;
+	width:15%;
+	padding:14px 0;
 }
 
 .clearfix{
-    clear:both;
+	clear:both;
 }
 
 .mlf_table th, .mlf_table td{
-    border:1px solid #bbb;
-    padding:10px;
-    text-align:center;
+	border:1px solid #bbb;
+	padding:10px;
+	text-align:center;
 }
 
 .mlf_table th, .mlf_table td.feature{
-    border-color:#888;
-    }
+	border-color:#888;
+	}
 
 .mlf_opts ul{
-    float: left;
-    display: block;
+	float: left;
+	display: block;
 }
 
 .mlf_input label{
-    
+	
 }
 
 .icon_add,
 .icon_edit {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-left: 5px;
-    }
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	margin-left: 5px;
+	}
 .icon_add span,
 .icon_edit span {
-    display: none;
-    }
-    
+	display: none;
+	}
+	
 .icon_add {
-    background:url('../images/add_16x16.gif') no-repeat 0 0;
+	background:url('../images/add_16x16.gif') no-repeat 0 0;
 }
 .icon_edit {
-    background:url('../images/edit_16x16.gif') no-repeat 0 0;
+	background:url('../images/edit_16x16.gif') no-repeat 0 0;
 }
 .icon_add:hover {
-    background:url('../images/add_16x16_hover.gif') no-repeat 0 0;
+	background:url('../images/add_16x16_hover.gif') no-repeat 0 0;
 }
 .icon_edit:hover {
-    background:url('../images/edit_16x16_hover.gif') no-repeat 0 0;
+	background:url('../images/edit_16x16_hover.gif') no-repeat 0 0;
 }
 
 /* metabox other version of post */
 ul.translation_tabs {
-    margin: 0;
-    padding: 0;
-    float: left;
-    list-style: none;
-    height: 32px;
-    border-bottom: 1px solid #DFDFDF;
-    border-left: 1px solid #DFDFDF;
-    width: 100%;
+	margin: 0;
+	padding: 0;
+	float: left;
+	list-style: none;
+	height: 32px;
+	border-bottom: 1px solid #DFDFDF;
+	border-left: 1px solid #DFDFDF;
+	width: 100%;
 }
 ul.translation_tabs li {
-    float: left;
-    margin: 0;
-    padding: 0;
-    height: 31px;
-    line-height: 31px;
-    border: 1px solid #DFDFDF;
-    border-left: none;
-    margin-bottom: -1px;
-    overflow: hidden;
-    position: relative;
-    background: #e0e0e0;
+	float: left;
+	margin: 0;
+	padding: 0;
+	height: 31px;
+	line-height: 31px;
+	border: 1px solid #DFDFDF;
+	border-left: none;
+	margin-bottom: -1px;
+	overflow: hidden;
+	position: relative;
+	background: #e0e0e0;
 }
 ul.translation_tabs li a {
-    text-decoration: none;
-    color: #000;
-    display: block;
-    font-size: 1.2em;
-    padding: 10px 20px;
-    outline: none;
+	text-decoration: none;
+	color: #000;
+	font-size: 1.2em;
+	padding: 10px 20px;
+	outline: none;
 }
 ul.translation_tabs li a:hover {
-    background: #ccc;
+	background: #ccc;
 }
-html ul.translation_tabs li.active, html ul.translation_tabs li.active a:hover  {
-    background: #fff;
-    border-bottom: 1px solid #fff;
+html ul.translation_tabs li.active, html ul.translation_tabs li.active a:hover {
+	background: #fff;
+	border-bottom: 1px solid #fff;
 }
 .post_translation_container{
-    padding: 7px;
-    overflow: auto;
-    height: 200px;
-    border: 1px solid #DFDFDF;
-    border-top: none;
+	padding: 7px;
+	overflow: auto;
+	height: 200px;
+	border: 1px solid #DFDFDF;
+	border-top: none;
 }
 
 .translation_div {
-    overflow: hidden;
+	overflow: hidden;
 }

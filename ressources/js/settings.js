@@ -1,43 +1,34 @@
-jQuery(function ($) {
-    $(document).ready(function() {
+jQuery(function () {
+	/* used in plugin settings page */
+	jQuery('.mlf_options').slideUp();
 
-        /* used in plugin settings page */        
-        $('.mlf_options').slideUp();
+	jQuery('.mlf_section h3').click(function(){
+		var el = jQuery(this);
+		if( el.parent().next( '.mlf_options' ).css( 'display' )=='none' ) {	
+				el.removeClass('inactive').addClass('active');
+				el.children('img').removeClass('inactive').addClass('active' );
+		} else {
+			el.removeClass( 'active' ).addClass( 'inactive' );
+			el.children( 'img' ).removeClass( 'active' ).addClass( 'inactive' );
+		}
+		
+		el.parent().next('.mlf_options').slideToggle('slow');
+	});
 
-        $('.mlf_section h3').click(function(){      
-            if($(this).parent().next('.mlf_options').css('display')=='none')
-                {   $(this).removeClass('inactive');
-                    $(this).addClass('active');
-                    $(this).children('img').removeClass('inactive');
-                    $(this).children('img').addClass('active');
+	/* used to present metabox of other versions of post */
 
-                }
-            else
-                {   $(this).removeClass('active');
-                    $(this).addClass('inactive');      
-                    $(this).children('img').removeClass('active');         
-                    $(this).children('img').addClass('inactive');
-                }
+	jQuery( ".translation_content" ).hide(); //Hide all content		
+	jQuery( "ul.translation_tabs li:first" ).addClass("active").show(); //Activate first tab
+	jQuery( ".translation_content:first").show(); //Show first tab content	
 
-            $(this).parent().next('.mlf_options').slideToggle('slow');  
-        });
- 
-        /* used to present metabox of other versions of post */
+	jQuery( "ul.translation_tabs li").click( function() {
+		var el = jQuery( this );
+		jQuery("ul.translation_tabs li" ).removeClass( "active" ); //Remove any "active" class
+		el.addClass( "active" ); //Add "active" class to selected tab
+		jQuery( ".translation_content" ).hide(); //Hide all tab content
 
-        $(".translation_content").hide(); //Hide all content        
-        $("ul.translation_tabs li:first").addClass("active").show(); //Activate first tab
-        $(".translation_content:first").show(); //Show first tab content    
-
-        $("ul.translation_tabs li").click(function() {
-
-            $("ul.translation_tabs li").removeClass("active"); //Remove any "active" class
-            $(this).addClass("active"); //Add "active" class to selected tab
-            $(".translation_content").hide(); //Hide all tab content
-
-            var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
-            $(activeTab).fadeIn(); //Fade in the active ID content
-            return false;
-        });
-       
-    });
+		var activeTab = el.find( "a" ).attr( "href" ); //Find the href attribute value to identify the active tab + content
+		jQuery( activeTab ).fadeIn(); //Fade in the active ID content
+		return false;
+	});
 });

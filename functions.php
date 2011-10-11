@@ -83,10 +83,13 @@ function mlf_extractURL($url, $host = '', $referer = '') {
 
 
 function mlf_localeForCurrentLanguage($locale){
-	global $mlf_config;
- 
-	$locale_list = mlf_get_option('locale');
-	$windows_locale_list = mlf_get_option('windows_locale');
+	return;
+	$mlf_default = get_option( MLF_OPTION_DEFAULT );
+	$mlf_config = get_option( MLF_OPTION_CONFIG );
+	var_dump($mlf_config);
+	
+	$locale_list = $mlf_default['locale'];
+	$windows_locale_list = $mlf_default['windows_locale'];
 	
 	// try to figure out the correct locale
 	$locale = array();
@@ -95,7 +98,7 @@ function mlf_localeForCurrentLanguage($locale){
 	$locale[] = $locale_list[$mlf_config['current_language']];
 	$locale[] = $windows_locale_list[$mlf_config['current_language']];
 	$locale[] = $mlf_config['current_language'];
-  
+	
 	// return the correct locale and most importantly set it (wordpress doesn't, which is bad)
 	// only set LC_TIME as everyhing else doesn't seem to work with windows
 	setlocale(LC_TIME, $locale);
@@ -234,13 +237,14 @@ function mlf_checkCanonical($redirect_url, $requested_url) {
 add_filter('the_content', 'mlf_add_link_to_other_languages');
 
 function mlf_add_link_to_other_languages($content) {
-
-	global $post, $mlf_config;
+	global $post;
 	$r = '';
 	$other_languages = mlf_get_tranlsations_ids($post->ID, $post->post_type);
 	
+	$mlf_config = get_option( MLF_OPTION_CONFIG );
+	
 	// We have to temporarily change the language to retrieve unflitered permalinks
-	$currentLanguage = $mlf_config['current_language'];
+	$currentLanguage = isset( $mlf_config['current_language'] )? $mlf_config['current_language'] : '' ;
 	$mlf_config['current_language'] = $mlf_config['default_language'];
 	
 	$r .= '<ul id="postmeta_translations">';
@@ -252,7 +256,6 @@ function mlf_add_link_to_other_languages($content) {
 			$r .= "<li><a href='" . get_permalink($l) . "'>" . $label . "</a></li>";
 		}
 	}
-
 	$r .= '</ul>';
 
 	//restore language
@@ -263,11 +266,11 @@ function mlf_add_link_to_other_languages($content) {
 }
 
 
-function mlf_isEnabled($lang) {
+function mlf_isEnabled( $lang ) {
 	
-	$enabled_languages = mlf_get_option('enabled_languages');
+	$options = get_option( MLF_OPTION_CONFIG );
 	
-	return in_array($lang, $enabled_languages);
+	return in_array( $lang, $options['enabled_languages'] );
 }
 
 function mlf_parseURL($url) {
@@ -302,11 +305,13 @@ function mlf_get_tranlsations_ids($post_id, $post_type = 'post') {
 	
 	$post_type_base = preg_replace('/(.+)_t_([a-zA-Z]{2})/', "$1", $post_type);
 	
-	$enabled_languages = mlf_get_option('enabled_languages');
-	$default_language = mlf_get_option('default_language');
+	$options = get_option( MLF_OPTION_CONFIG );
+	$enabled_languages = isset( $enabled_languages )? $enabled_languages : array() ;
+	$default_language = isset( $default_language )? $default_language : array() ;
+
 	$result = array();
 	
-	foreach ($enabled_languages as $lang) {
+	foreach ( $enabled_languages as $lang ) {
 			
 		$translation_id = false;
 		$p_type = $post_type_base . '_t_' . $lang;			

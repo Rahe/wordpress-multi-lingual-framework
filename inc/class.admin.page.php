@@ -25,10 +25,11 @@ class MLF_Admin_Page{
 	}
 	
 	function adminPage() {
-	$mlf_config = get_option( 'mlf_config' );
-
-	$mlf_static = mlf_load_static_options();
+	$mlf_config = get_option( MLF_OPTION_CONFIG );
+	$mlf_default = get_option( MLF_OPTION_DEFAULT );
 	
+	$mlf_config['enabled_languages'] = isset( $mlf_config['enabled_languages'] ) && !empty( $mlf_config['enabled_languages'] )? $mlf_config['enabled_languages'] : array() ;
+	$mlf_config['default_language'] = isset( $mlf_config['default_language'] )? $mlf_config['default_language'] : '' ;
 	?>
 	<div class="wrap">
 		<form method="post" action="options.php">
@@ -37,7 +38,7 @@ class MLF_Admin_Page{
 			<h3><?php _e( 'Default language', 'mlf' ); ?></h3>
 				<select name="mlf_config[default_language]">
 				<?php foreach( $mlf_config['enabled_languages'] as $lang ) : ?>
-					<option value="<?php esc_attr_e( $lang ); ?>" <?php selected( $lang, $mlf_config['default_language'] ); ?> > <?php echo $mlf_static['language_name'][$lang]; ?></option>
+					<option value="<?php esc_attr_e( $lang ); ?>" <?php selected( $lang, $mlf_config['default_language'] ); ?> > <?php echo $mlf_default['language_name'][$lang]; ?></option>
 				<?php endforeach; ?>
 				</select>
 			<h3><?php _e( 'URL Mode', 'mlf' ); ?></h3>
@@ -73,14 +74,17 @@ class MLF_Admin_Page{
 							<th><?php _e( 'Translation available link label', 'mlf' ); ?></th>
 						</tr>
 					</tfoot>
-				<?php foreach ( $mlf_static['language_name'] as $lang => $name ): ?>
+				<?php foreach( $mlf_default['language_name'] as $lang => $name ): 
+					$not_avaible = isset( $mlf_default['labels']['not_available'][$lang] )? $mlf_default['labels']['not_available'][$lang] : '' ;
+					$avaible = isset( $mlf_default['labels']['available'][$lang] )? $mlf_default['labels']['available'][$lang] : '' ;
+				?>
 					<tr>
 						<td>
 							<input type="checkbox" name="mlf_config[enabled_languages][]" value="<?php echo $lang; ?>" <?php checked( in_array( $lang, $mlf_config['enabled_languages'] ), true ); ?> >
 						</td>
 						<td><?php echo $name; ?></td>
-						<td><input type="text" name="mlf_config[labels][not_available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $mlf_config['labels']['not_available'][$lang] ); ?>"></td>
-						<td><input type="text" name="mlf_config[labels][available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $mlf_config['labels']['available'][$lang] ); ?>"></td>
+						<td><input type="text" name="mlf_config[labels][not_available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $not_avaible ); ?>"></td>
+						<td><input type="text" name="mlf_config[labels][available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $avaible ); ?>"></td>
 					</tr>
 				<?php endforeach; ?>
 				</table>
