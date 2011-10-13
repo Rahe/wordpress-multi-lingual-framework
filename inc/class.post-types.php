@@ -1,20 +1,14 @@
 <?php
 class MLF_PostTypes {
 	
-	private $_config = array();
-	private $_default = array();
-	private $_options = array();
+	protected $_config = array();
+	protected $_default = array();
+	protected $_options = array();
 	
 	function __construct() {
 		
-		// Get teh options
-		$this->_config = get_option( MLF_OPTION_CONFIG );
-		$this->_default = get_option( MLF_OPTION_DEFAULT );
-		
-		$this->_options = array_merge( $this->_config, $this->_default );
-		
-		$this->_options['enabled_languages'] = isset( $this->_options['enabled_languages'] )? $this->_options['enabled_languages'] : array() ;
-		$this->_options['default_language'] = isset( $this->_options['default_language'] )? $this->_options['default_language'] : array() ;
+		// init the options
+		$this->initOptions();
 		
 		add_action( 'init', array( &$this ,'postTranslationsInit' ) );
 		
@@ -32,59 +26,27 @@ class MLF_PostTypes {
 		add_action( 'page_submitbox_misc_actions', array( &$this ,'mlf_copy_date_checkbox' ) );
 	}
 	
+	function initOptions() {
+		// Get the options
+		$this->_config = get_option( MLF_OPTION_CONFIG );
+		$this->_default = get_option( MLF_OPTION_DEFAULT );
+		
+		$this->_options = array_merge( $this->_config, $this->_default );
+		
+		$this->_options['enabled_languages'] = isset( $this->_options['enabled_languages'] )? $this->_options['enabled_languages'] : array() ;
+		$this->_options['default_language'] = isset( $this->_options['default_language'] )? $this->_options['default_language'] : array() ;
+		
+	}
+	
 	function postTranslationsInit() {
-		global $wp_post_types, $_wp_post_type_features;
-		
-		$language_name = $this->_options['language_name'];
-		$enabled_languages = $this->_options['enabled_languages'];
-		$default_language = $this->_options['default_language'];
-		
-		if( !empty( $enabled_languages ) ) {
-			foreach ( $enabled_languages as $l ) {
-				if ( $l == $default_language )
+		if( !empty( $this->_options['enabled_languages'] ) ) {
+			foreach ( $this->_options['enabled_languages'] as $l ) {
+				if ( $l == $this->_options['default_language'] )
 					continue;
-				foreach ( $this->_options['post_types'] as $p_type ) {
-					$labels = (array) $wp_post_types[$p_type]->labels;
-					$labels['name'] .= ' - ' . $language_name[$l];
-					$labels['menu_name'] .= ' - ' . $language_name[$l];
-					
-					// Post type position
-					switch ( $p_type ) {
-						case 'post':
-							$menu_pos = 5;
-							break;
-						case 'page':
-							$menu_pos = 20;
-							break;
-						default:
-							$menu_pos = $wp_post_types[$p_type]->menu_position ? $wp_post_types[$p_type]->menu_position : 25;
-					}
-					
-					// Get the current post_type features
-					$p_type_supports = array_keys( $_wp_post_type_features[$p_type] );
-					
-					// Arguments for the post_type creation
-					$args = array(
-						'labels' => $labels,
-						'public' => true,
-						'rewrite' => array( 'slug' => $l),
-						'capability_type' => $wp_post_types[$p_type]->capability_type,
-						'hierarchical' => $wp_post_types[$p_type]->hierarchical == 1,
-						'menu_position' => $menu_pos,
-						'supports' => $p_type_supports
-					);
-					
+				foreach ( $this->_options['post_types'] as $p_type ) {	
 					// Register the post type
-					register_post_type( $p_type . '_t_' . $l, $args );
+					$pType = new MLF_PostType( $p_type, $l );
 				}
-			}
-		}
-		
-		// Add columns for custom post types
-		if( !empty( $this->_options['post_types'] ) ) {
-			foreach (  $this->_options['post_types'] as $p_type ) {
-				add_filter( 'manage_'.$p_type.'_posts_columns', array( &$this ,'addColumnContent' ), 10, 2 );
-				add_action( 'save_'.$p_type, array( &$this , 'postSave' ) );
 			}
 		}
 	}
@@ -92,9 +54,7 @@ class MLF_PostTypes {
 	function addColumn( $defaults ) {
 		global $pagenow;
 		
-		$enabled_languages = $this->_options['enabled_languages'];
-		
-		if( count( $enabled_languages ) <= 1 || get_query_var( 'post_status' ) == 'trash' ){
+		if( count( $this->_options['enabled_languages'] ) <= 1 || get_query_var( 'post_status' ) == 'trash' ){
 			return $defaults;
 		}
 		
@@ -107,14 +67,11 @@ class MLF_PostTypes {
 	}
 	
 	function translationBox() {
-		$enabled_languages = isset( $this->_options['enabled_languages'] )? $this->_options['enabled_languages'] : array() ;
-		$post_types = $this->_options['post_types'];
-		
-		foreach ( $post_types as $p ) {
+		foreach ( $this->_options['post_types'] as $p ) {
 			add_meta_box( 'post_translations',__( 'Post Translations', 'mlf' ), array( &$this, 'translationInnerBox' ), $p, 'side' );
 			add_meta_box( 'mlf_other_version_id',__( 'Post Translations', 'mlf' ), array( &$this, 'otherVersions' ), $p, 'normal', 'high' );
 			
-			foreach ( $enabled_languages as $lang ) {
+			foreach ( $this->_options['enabled_languages'] as $lang ) {
 				add_meta_box( 'post_translations',__( 'Post Translations', 'mlf' ), array( &$this, 'translationInnerBox' ), $p . '_t_' . $lang, 'side' );
 				add_meta_box( 'mlf_other_version_id',__( 'Post Translations', 'mlf' ), array( &$this, 'otherVersions' ), $p . '_t_' . $lang, 'normal', 'high' );
 			}
@@ -127,11 +84,7 @@ class MLF_PostTypes {
 		if ( $column_name != "post_translations" )
 			return $column_name;
 		
-		// Get enabled and default languages
-		$enabled_languages = $this->_options['enabled_languages'];
-		$default_language = $this->_options['default_language'];
-		
-		if( empty( $enabled_languages ) )
+		if( empty( $this->_options['enabled_languages'] ) )
 			return $column_name;
 		
 		// Get the post_type in 
@@ -145,7 +98,7 @@ class MLF_PostTypes {
 		$post_type_base = preg_replace( '/^(\S+)_t_\S{2}$/', "$1", $post_type );
 		
 		echo '<ul class="languages-list">';
-		foreach ( $enabled_languages as $lang ) {
+		foreach ( $this->_options['enabled_languages'] as $lang ) {
 			// Default value
 			$translation_id = 0;
 			
@@ -153,7 +106,7 @@ class MLF_PostTypes {
 			$p_type = $post_type_base . '_t_' . $lang;
 			
 			// Check not same
-			if ( $p_type == $post_type_base . '_t_' . $default_language )
+			if ( $p_type == $post_type_base . '_t_' . $this->_options['default_language'] )
 				$p_type = $post_type_base;
 			
 			// Check not same
@@ -188,9 +141,6 @@ class MLF_PostTypes {
 		
 		echo '<input type="hidden" name="_translation_of" value="' . esc_attr( $translation_of ). '" >';
 		echo '<input type="hidden" name="_saveTranslation" value="saving" >';
-
-		$default_language = $this->_options['default_language'];
-		$enabled_languages = $this->_options['enabled_languages'];
 	
 		#só aparecer links pra criar ou editar traduções quando estiver editando posts
 		if ( isset( $_GET['action'] ) && $_GET['action'] != 'edit' ) {
@@ -202,7 +152,7 @@ class MLF_PostTypes {
 		$post_type_base = preg_replace( '/^(\S+)_t_\S{2}$/', "$1", $post->post_type );
 		
 		echo '<ul>';
-		foreach ( $enabled_languages as $lang ) {
+		foreach ( $this->_options['enabled_languages'] as $lang ) {
 			// Default value
 			$translation_id = 0;
 			
@@ -210,7 +160,7 @@ class MLF_PostTypes {
 			$p_type = $post_type_base . '_t_' . $lang;
 			
 			// Check post_type base language
-			if ($p_type == $post_type_base . '_t_' . $default_language)
+			if ($p_type == $post_type_base . '_t_' . $this->_options['default_language'])
 				$p_type = $post_type_base;
 			
 			// If same ptype do not display the link edit/add
@@ -246,33 +196,6 @@ class MLF_PostTypes {
 	function theTranslationAddLink( $tId, $pType, $lang ) {
 		return mlf_translationAddLink( $tId, $pType, $lang );
 	}
-	/*
-	function addRelationship( $original, $new ) {
-		if ( !$original || !$new )
-			return;
-		
-		$original_trans = get_post_meta( $original, '_translation_of' );
-		$new_trans = get_post_meta( $new, '_translation_of' );
-		
-		$original_trans[] 	= $new;
-		$new_trans[] 		= $original;
-		
-		update_post_meta( $original, '_translation_of', $original_trans );
-		update_post_meta( $new, '_translation_of', $new_trans );
-	
-		$also_translation_of = get_post_meta( $original, '_translation_of' );
-	
-		if ( !empty( $also_translation_of ) && is_array( $also_translation_of ) ) {
-			foreach ( $also_translation_of as $a ) {
-				if ( $a != $new ) {
-					update_post_meta( $new, '_translation_of', $a );
-					update_post_meta( $a, '_translation_of', $new );
-				}
-			}
-		} else {
-			update_post_meta( $original, '_translation_of', array( $new ) );
-		}
-	}*/
 	
 	function add_post_meta($post_id, $meta_key, $meta_value) {
 		global $wpdb;
@@ -288,23 +211,23 @@ class MLF_PostTypes {
 		
 	}
 	
-	function addRelationship($original, $new) {
+	function addRelationship( $original, $new ) {
 	
 		if (!$original || !$new)
 			return;
 		
-		$this->add_post_meta($original, '_translation_of', $new);
-		$this->add_post_meta($new, '_translation_of', $original);
+		$this->add_post_meta( $original, '_translation_of', $new );
+		$this->add_post_meta( $new, '_translation_of', $original );
 		
 		#var_dump($original, $new); die;
 	
-		$also_translation_of = get_post_meta($original, '_translation_of');
+		$also_translation_of = get_post_meta( $original, '_translation_of' );
 	
-		if (is_array($also_translation_of)) {
-			foreach ($also_translation_of as $a) {
-				if ($a != $new) {
-					$this->add_post_meta($new, '_translation_of', $a);
-					$this->add_post_meta($a, '_translation_of', $new);
+		if ( is_array( $also_translation_of ) ) {
+			foreach ( $also_translation_of as $a ) {
+				if ( $a != $new ) {
+					$this->add_post_meta( $new, '_translation_of', $a );
+					$this->add_post_meta( $a, '_translation_of', $new );
 				}
 			}
 		}
@@ -325,7 +248,7 @@ class MLF_PostTypes {
 		
 		$this->addRelationship( $_POST['_translation_of'], $post_id );
 		
-		if ( $_POST['mlf_copy_date'] == 1 && isset( $_POST['_translation_of'] ) && (int)$_POST['_translation_of'] > 0 ) {
+		if ( isset( $_POST['mlf_copy_date'] ) && $_POST['mlf_copy_date'] == 1 && isset( $_POST['_translation_of'] ) && (int)$_POST['_translation_of'] > 0 ) {
 			$from = get_post( $_POST['_translation_of'] );
 			
 			remove_action( 'save_'.$_POST['post_type'], array( &$this, 'postSave' ) );
@@ -348,8 +271,7 @@ class MLF_PostTypes {
 	
 	function otherVersions(){
 		global $post;
-	
-		$default_language = $this->_options['default_language'];
+		
 		$class = '';
 		
 		$edit_post = $post;
@@ -371,7 +293,7 @@ class MLF_PostTypes {
 				if ( preg_match( '/^\S+_t_(\S{2})$/', $post->post_type ) )
 					$lang = preg_replace( '/^\S+_t_(\S{2})$/', "$1", $post->post_type );
 				else
-					$lang = $default_language;
+					$lang = $this->_options['default_language'];
 					
 				$translation_version[$lang] = '<h2>' . get_the_title() . '</h2>' . get_the_content();
 			}
@@ -381,7 +303,12 @@ class MLF_PostTypes {
 				<ul class="translation_tabs">
 					<?php
 						foreach ( $translation_version as $lang => $text ) {
-							echo '<li class="' . $class . '"><a href="#post_translation_'. $lang . '">'.$this->_options['language_name'][$lang].'</a></li>';
+							$title = $this->_options['language_name'][$lang];
+							
+							if( $lang == $this->_options['default_language'] )
+								$title .= __( ' - Original', 'mlf' );
+							
+							echo '<li class="' . $class . '"><a href="#post_translation_'. $lang . '">'.$title.'</a></li>';
 						}
 					 ?>
 				</ul>

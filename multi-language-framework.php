@@ -26,6 +26,7 @@ require_once( MLF_DIR . "/inc/class.client.php" );
 require_once( MLF_DIR . "/inc/class.admin.php" );
 require_once( MLF_DIR . "/inc/class.admin.page.php" );
 require_once( MLF_DIR . "/inc/class.post-types.php" );
+require_once( MLF_DIR . "/inc/class.post-type.php" );
 require_once( MLF_DIR . "/inc/class.widget.php" );
 require_once( MLF_DIR . "/inc/functions.tpl.php" );
 require_once( MLF_DIR . "/inc/functions.inc.php" );
@@ -45,6 +46,7 @@ function mlf_init() {
 		$mlf['admin'] = new MLF_Admin();
 		$mlf['admin-page'] = new MLF_Admin_Page();
 	}
+	
 	$mlf['post-types'] = new MLF_PostTypes();
 }
 
@@ -52,6 +54,7 @@ function mlf_get_option( $option_name ) {
 	global $mlf_config;
 	return $mlf_config[$option_name];
 }
+
 register_activation_hook(__FILE__, 'mlf_activate');
 register_deactivation_hook(__FILE__, 'mlf_deactivate');
 
