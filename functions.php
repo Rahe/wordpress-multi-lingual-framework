@@ -1,16 +1,14 @@
-<?php 
-
+<?php
 // returns cleaned string and language information
 function mlf_extractURL($url, $host = '', $referer = '') {
-	
 	$default_language = mlf_get_option('default_language');
 	$url_mode = mlf_get_option('url_mode');
 	$hide_default_language  = mlf_get_option('hide_default_language');
-	
+
 	$home = mlf_parseURL(get_option('home'));
 	$home['path'] = trailingslashit($home['path']);
 	$referer = mlf_parseURL($referer);
-	
+
 	$result = array();
 	$result['current_language'] = $default_language;
 	$result['url'] = $url;
@@ -19,7 +17,7 @@ function mlf_extractURL($url, $host = '', $referer = '') {
 	$result['redirect'] = false;
 	$result['internal_referer'] = false;
 	$result['home'] = $home['path'];
-	
+
 	switch($url_mode) {
 		case "path":
 			// pre url
@@ -48,13 +46,13 @@ function mlf_extractURL($url, $host = '', $referer = '') {
 			}
 			break;
 	}
-	
+
 	// check if referer is internal
 	if($referer['host']==$result['host'] && mlf_startsWith($referer['path'], $home['path'])) {
 		// user coming from internal link
 		$result['internal_referer'] = true;
 	}
-	
+
 	if(isset($_GET['lang']) && mlf_isEnabled($_GET['lang'])) {
 		// language override given
 		$result['current_language'] = $_GET['lang'];
@@ -77,52 +75,52 @@ function mlf_extractURL($url, $host = '', $referer = '') {
 			}
 		}
 	}
-	
 	return $result;
 }
 
 
 function mlf_localeForCurrentLanguage($locale){
-	return;
+	global $locale;
+
 	$mlf_default = get_option( MLF_OPTION_DEFAULT );
 	$mlf_config = get_option( MLF_OPTION_CONFIG );
-	var_dump($mlf_config);
 	
 	$locale_list = $mlf_default['locale'];
 	$windows_locale_list = $mlf_default['windows_locale'];
-	
+	/*
 	// try to figure out the correct locale
 	$locale = array();
-	$locale[] = $locale_list[$mlf_config['current_language']].".utf8";
-	$locale[] = $locale_list[$mlf_config['current_language']]."@euro";
-	$locale[] = $locale_list[$mlf_config['current_language']];
-	$locale[] = $windows_locale_list[$mlf_config['current_language']];
-	$locale[] = $mlf_config['current_language'];
+	$locale[] = $locale_list[$locale].".utf8";
+	$locale[] = $locale_list[$locale]."@euro";
+	$locale[] = $locale_list[$locale];
+	$locale[] = $windows_locale_list[$locale];
+	$locale[] = $locale;
 	
 	// return the correct locale and most importantly set it (wordpress doesn't, which is bad)
 	// only set LC_TIME as everyhing else doesn't seem to work with windows
 	setlocale(LC_TIME, $locale);
-	
-	return $locale_list[$mlf_config['current_language']];
+	 * */
+	//var_dump( $locale_list );
+	return $locale;
 }
 
 
 function mlf_convertURL($url='', $lang='', $forceadmin = false) {
 	global $mlf_config;
-	
+
 	// invalid language
 	if($url=='') $url = esc_url($mlf_config['url_info']['url']);
 	if($lang=='') $lang = $mlf_config['current_language'];
 	if(defined('WP_ADMIN')&&!$forceadmin) return $url;
 	if(!mlf_isEnabled($lang)) return "";
-	
+
 	// & workaround
 	$url = str_replace('&amp;','&',$url);
 	$url = str_replace('&#038;','&',$url);
-	
+
 	// check for trailing slash
 	$nottrailing = (strpos($url,'?')===false && strpos($url,'#')===false && substr($url,-1,1)!='/');
-	
+
 	// check if it's an external link
 	$urlinfo = mlf_parseURL($url);
 	$home = rtrim(get_option('home'),"/");
@@ -148,33 +146,33 @@ function mlf_convertURL($url='', $lang='', $forceadmin = false) {
 			$url = substr($url,strlen($homeinfo['path']));
 		}
 	}
-	
+
 	// check for query language information and remove if found
 	if(preg_match("#(&|\?)lang=([^&\#]+)#i",$url,$match) && mlf_isEnabled($match[2])) {
 		$url = preg_replace("#(&|\?)lang=".$match[2]."&?#i","$1",$url);
 	}
-	
+
 	// remove any slashes out front
 	$url = ltrim($url,"/");
-	
+
 	// remove any useless trailing characters
 	$url = rtrim($url,"?&");
-	
+
 	// reparse url without home path
 	$urlinfo = mlf_parseURL($url);
-	
+
 	// check if its a link to an ignored file type
 	$ignore_file_types = preg_split('/\s*,\s*/', strtolower($mlf_config['ignore_file_types']));
 	$pathinfo = pathinfo($urlinfo['path']);
 	if(isset($pathinfo['extension']) && in_array(strtolower($pathinfo['extension']), $ignore_file_types)) {
 		return $home."/".$url;
 	}
-	
+
 	// dirty hack for wp-login.php
 	if(strpos($url,"wp-login.php")!==false) {
 		return $home."/".$url;
 	}
-	
+
 	switch($mlf_config['url_mode']) {
 		case 'path':	// pre url
 			// might already have language information
@@ -199,7 +197,7 @@ function mlf_convertURL($url='', $lang='', $forceadmin = false) {
 				$url .= "lang=".$lang;
 			}
 	}
-	
+
 	// see if cookies are activated
 	if(!$mlf_config['cookie_enabled'] && !$mlf_config['url_info']['internal_referer'] && $urlinfo['path'] == '' && $lang == $mlf_config['default_language'] && $mlf_config['current_language'] != $mlf_config['default_language'] && $mlf_config['hide_default_language']) {
 		// :( now we have to make unpretty URLs
@@ -211,19 +209,19 @@ function mlf_convertURL($url='', $lang='', $forceadmin = false) {
 		}
 		$url .= "lang=".$lang;
 	}
-	
+
 	// &amp; workaround
 	$complete = str_replace('&','&amp;',$home."/".$url);
 
 	// remove trailing slash if there wasn't one to begin with
 	if($nottrailing && strpos($complete,'?')===false && strpos($complete,'#')===false && substr($complete,-1,1)=='/')
 		$complete = substr($complete,0,-1);
-	
+
 	return $complete;
 }
 
 
-add_filter('redirect_canonical',			'mlf_checkCanonical', 10, 2);
+//add_filter('redirect_canonical',			'mlf_checkCanonical', 10, 2);
 
 function mlf_checkCanonical($redirect_url, $requested_url) {
 	// fix canonical conflicts with language urls
@@ -234,7 +232,7 @@ function mlf_checkCanonical($redirect_url, $requested_url) {
 	return $redirect_url;
 }
 
-add_filter('the_content', 'mlf_add_link_to_other_languages');
+//add_filter('the_content', 'mlf_add_link_to_other_languages');
 
 function mlf_add_link_to_other_languages($content) {
 	global $post;
@@ -262,12 +260,9 @@ function mlf_add_link_to_other_languages($content) {
 	$mlf_config['current_language'] = $currentLanguage;
 	
 	return $content . $r;
-
 }
 
-
 function mlf_isEnabled( $lang ) {
-	
 	$options = get_option( MLF_OPTION_CONFIG );
 	
 	return in_array( $lang, $options['enabled_languages'] );
@@ -290,20 +285,19 @@ function mlf_parseURL($url) {
 	return $result;
 }
 
-function mlf_startsWith($s, $n) {
-	if(strlen($n)>strlen($s)) return false;
-	if($n == substr($s,0,strlen($n))) return true;
+function mlf_startsWith( $s, $n ) {
+	if( strlen( $n )>strlen( $s ) ) return false;
+	if( $n == substr( $s,0,strlen( $n ) ) ) return true;
 	return false;
 }
 
-function mlf_get_tranlsations_ids($post_id, $post_type = 'post') {
-
-	if (!is_numeric($post_id))
+function mlf_get_tranlsations_ids( $post_id, $post_type = 'post' ) {
+	if ( !is_numeric( $post_id ) )
 		return false;
 	
 	global $wpdb;
 	
-	$post_type_base = preg_replace('/(.+)_t_([a-zA-Z]{2})/', "$1", $post_type);
+	$post_type_base = preg_replace( '/(.+)_t_([a-zA-Z]{2})/', "$1", $post_type );
 	
 	$options = get_option( MLF_OPTION_CONFIG );
 	$enabled_languages = isset( $enabled_languages )? $enabled_languages : array() ;
@@ -314,7 +308,7 @@ function mlf_get_tranlsations_ids($post_id, $post_type = 'post') {
 	foreach ( $enabled_languages as $lang ) {
 			
 		$translation_id = false;
-		$p_type = $post_type_base . '_t_' . $lang;			
+		$p_type = $post_type_base . '_t_' . $lang;
 		
 		if ($p_type == $post_type_base . '_t_' . $default_language)
 			$p_type = $post_type_base;
@@ -323,44 +317,38 @@ function mlf_get_tranlsations_ids($post_id, $post_type = 'post') {
 			continue;
 		}
 		
-		$result[$lang] = $wpdb->get_var("SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$post_id ");
+		$result[$lang] = $wpdb->get_var( "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='$p_type' AND meta_key='_translation_of' AND meta_value=$post_id " );
 		
 	}
 	
 	return $result;
-	
 }
 
-function mlf_add_not_available_message($content) {
-
+function mlf_add_not_available_message( $content ) {
 	global $post, $mlf_config;
 	
 	$message = $mlf_config['labels']['not_available'][$mlf_config['current_language']] ? $mlf_config['labels']['not_available'][$mlf_config['current_language']] : sprintf(__('This entry is not available in %s','mlf'), $mlf_config['language_name'][$mlf_config['current_language']]);
 	
 	return "<p class='mlf_alert'>$message</p>$content";
-
 }
 
 
 function mlf_links_to_languages() {
-
 	global $mlf_config;
-	
+
 	$originalLanguage = $mlf_config['current_language'];
-	
+
 	echo '<ul id="languages_list">';
-	
-	if (is_singular()) {
-	
+	if ( is_singular() ) {
 		global $wp_query;
 		$post = $wp_query->get_queried_object();
-		$other_languages = mlf_get_tranlsations_ids($post->ID, $post->post_type);
+		$other_languages = mlf_get_tranlsations_ids( $post->ID, $post->post_type );
 		
-		foreach ($mlf_config['enabled_languages'] as $lang) {
-			
-			if ($originalLanguage == $lang)
+		foreach ( $mlf_config['enabled_languages'] as $lang ) {
+
+			if ( $originalLanguage == $lang )
 				continue;
-			
+
 			$flag_img = MLF_PLUGIN_URL . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
 			
 			// does this entry have a translation?
@@ -386,13 +374,10 @@ function mlf_links_to_languages() {
 	
 	
 	} else {
-	
-	
-		foreach ($mlf_config['enabled_languages'] as $lang) {
-		
+		foreach ( $mlf_config['enabled_languages'] as $lang ) {
 			if ($originalLanguage == $lang)
 				continue;
-			
+
 			$mlf_config['current_language'] = $lang;
 			$flag_img = MLF_PLUGIN_URL . $mlf_config['flag_location'] . $mlf_config['flag'][$lang];
 			?>
@@ -405,14 +390,10 @@ function mlf_links_to_languages() {
 			<?php
 			
 		}
-		
-	
 	}
-	
+
 	echo '</ul>';
-	
+
 	$mlf_config['current_language'] = $originalLanguage;
-
 }
-
 ?>

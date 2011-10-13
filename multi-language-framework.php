@@ -22,6 +22,7 @@ define( 'MLF_DIR', dirname(__FILE__) );
 define( 'MLF_OPTION_CONFIG', 'mlf_config' );
 define( 'MLF_OPTION_DEFAULT', 'mlf_default' );
 
+require_once( MLF_DIR . "/inc/class.rewrite.php" );
 require_once( MLF_DIR . "/inc/class.client.php" );
 require_once( MLF_DIR . "/inc/class.admin.php" );
 require_once( MLF_DIR . "/inc/class.admin.page.php" );
@@ -40,6 +41,7 @@ add_action('plugins_loaded','mlf_init');
 function mlf_init() {
 	global $mlf;
 	
+	$mlf['rewrite'] = new MLF_Rewrite();
 	$mlf['client'] = new MLF_Client();
 	
 	if( is_admin() ) {
@@ -61,7 +63,7 @@ register_deactivation_hook(__FILE__, 'mlf_deactivate');
 // Hooks (Actions)
 add_filter('locale',		'mlf_localeForCurrentLanguage',99);
 
-add_filter('author_feed_link',				'mlf_convertURL');
+/*add_filter('author_feed_link',				'mlf_convertURL');
 add_filter('author_link',					'mlf_convertURL');
 add_filter('author_feed_link',				'mlf_convertURL');
 add_filter('day_link',						'mlf_convertURL');
@@ -79,6 +81,5 @@ add_filter('feed_link',						'mlf_convertURL');
 add_filter('post_comments_feed_link',		'mlf_convertURL');
 add_filter('tag_feed_link',					'mlf_convertURL');
 //add_filter('clean_url',						'mlf_convertURL');
-
-
+*/
 ?>
