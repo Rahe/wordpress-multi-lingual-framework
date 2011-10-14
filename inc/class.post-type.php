@@ -44,7 +44,7 @@ class MLF_PostType extends MLF_PostTypes {
 		$args = array(
 			'labels' => $labels,
 			'public' => true,
-			'rewrite' => array( 'slug' => $this->_lang),
+			'rewrite' => array( 'slug' => $this->_lang ),
 			'capability_type' => $wp_post_types[$this->_post_type]->capability_type,
 			'hierarchical' => $wp_post_types[$this->_post_type]->hierarchical == 1,
 			'menu_position' => $menu_pos,

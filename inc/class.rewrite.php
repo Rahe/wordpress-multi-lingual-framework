@@ -1,50 +1,47 @@
 <?php
 class MLF_Rewrite {
 	function __construct() {
-		// Generating for the datas
-		add_action( 'generate_rewrite_rules', array( &$this, 'rewriteRules' ) );
-		
-		// add the query vars
-		add_filter( 'query_vars', array( &$this, 'addQueryVar' ) );
-		
 		// Parse the query
-		add_action( 'parse_query', array( &$this, 'parseQuery' ) );
+		add_action( 'parse_query', array( &$this, 'parseQuery' ), 9 );
 	}
-
+	
 	function parseQuery( $query ) {
-	}
-
-	function rewriteRules( $wp_rewrite ) {
+		
+		// Check if admin
+		if( is_admin() )
+			return;
+		
+		if( !isset( $query->query_vars['post_type'] ) )
+			return false;
+		
 		// Get the options
 		$options = get_option( MLF_OPTION_CONFIG );
-
-		// Get languages and the post_types
-		$enabled_languages = isset( $options['enabled_languages'] )? $options['enabled_languages'] : '' ;
-		$post_types = isset( $options['post_types'] )? $options['post_types'] : '' ;
 		
-		// check if languages and post_types
-		if( empty( $enabled_languages ) || empty( $post_types ) )
+		// Get the lang
+		$lang = explode( '_t_', $query->query_vars['post_type'] );
+		
+		// Check if not default and enabled
+		if( !isset( $lang[1] ) || !in_array( $lang[1], $options['enabled_languages'] ) || $lang[1] == $options['default_language'] )
 			return false;
-
-		// implode the languages
-		$langs = implode( $enabled_languages, '|' );
-
-		// Make the rewrite rules
-		foreach( $post_types as $ptype ) {
-			$new_rules[ '('.$langs.')/[^/]+/'] = 'index.php?mlf_lang='.$wp_rewrite->preg_index( 1 ).'&post_type='.$ptype.'_t_'.$wp_rewrite->preg_index( 1 );
-		}
 		
-		// Put them on the 
-		$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
+		// Add the templates if this is an language
+		add_action( 'template_redirect', array( &$this, 'templateRedirect' ) );
 	}
 	
-	function addQueryVar( $query_vars = array() ) {
-		$query_vars[] = 'mlf_lang';
-		return $query_vars;
-	}
-	
-	function templateRedirect() {
+	function templateRedirect( $templates = array() ) {
+		global $wp_query;
 		
+		// Get post_type and language
+		$els = explode( '_t_', $wp_query->query_vars['post_type'] );
+		
+		// Make the single templates
+		$templates[] = 'single-'.$els[0].'-'.$els[1].'.php' ;
+		$templates[] = 'single-'.$els[0].'.php' ;
+		$templates[] = 'single.php';
+		
+		// Add the templates to the current
+		locate_template( $templates, true );
+		exit();
 	}
 }
 ?>

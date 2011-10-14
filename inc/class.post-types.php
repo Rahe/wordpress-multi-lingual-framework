@@ -273,59 +273,78 @@ class MLF_PostTypes {
 		global $post;
 		
 		$class = '';
+		$original = $post->ID;
 		
-		$edit_post = $post;
-	
+		// Get the post datas
 		$posts = new WP_Query( 
 			array(
 				'post_type' => 'any',
-				'meta_key' 	=> '_translation_of',
-				'meta_value'	=> $post->ID,
+				'post__not_in ' => array( $post->ID ),
+				'meta_query' => array(
+					array(
+						'key' => '_translation_of',
+						'value' => $post->ID,
+						'compare' => '='
+					)
+				)
 			)
 		);
-
+		
 		if ( $posts->have_posts() ) {
 			$translation_version = array();
 	
 			while ( $posts->have_posts() ) {
 				$posts->the_post();
 				
+				// If this is an traduction, then get the lang from the post_type
 				if ( preg_match( '/^\S+_t_(\S{2})$/', $post->post_type ) )
 					$lang = preg_replace( '/^\S+_t_(\S{2})$/', "$1", $post->post_type );
 				else
 					$lang = $this->_options['default_language'];
-					
+				
+				// If we are on the same post as current, do not diplay the content
+				if( $original == get_the_ID() )
+					continue;
+				
+				// Make title and content
 				$translation_version[$lang] = '<h2>' . get_the_title() . '</h2>' . get_the_content();
 			}
-			$post = $edit_post;
-		?>
+			
+			// If translation available, display tabs
+			if( !empty( $translation_version ) ) :
+			?>
 			<div class="translation_div">
 				<ul class="translation_tabs">
 					<?php
 						foreach ( $translation_version as $lang => $text ) {
+							// Get the language name
 							$title = $this->_options['language_name'][$lang];
 							
+							// if original langague,display it
 							if( $lang == $this->_options['default_language'] )
 								$title .= __( ' - Original', 'mlf' );
 							
-							echo '<li class="' . $class . '"><a href="#post_translation_'. $lang . '">'.$title.'</a></li>';
+							echo '<li class="' .esc_attr( $class ). '"><a href="#post_translation_'. esc_attr( $lang ) . '">'.$title.'</a></li>';
 						}
 					 ?>
 				</ul>
 				<div class="post_translation_container">
 					<?php
 						foreach ( $translation_version as $lang => $text ) {
-							echo '<div id="post_translation_' . $lang .'" class="translation_content"> ';
+							echo '<div id="post_translation_' .esc_attr( $lang ).'" class="translation_content"> ';
 							echo apply_filters( 'the_content', $text );
 							echo '</div>';
 						}
 					 ?>
 				</div>
-			</div> 
-		<?php
-	
+			</div>
+			<?php
+			endif;
+		} else {
+			_e( 'No translations yet.', 'mlf' );
 		}
-	
-		$post = $edit_post;
+		
+		// Reset post datas for the rest of the post
+		wp_reset_postdata();
 	}
 }
