@@ -6,7 +6,7 @@ class MLF_Client{
 	}
 	
 	function registerWidget() {
-		register_widget("WidgetMultiLanguageFramework");
+		register_widget("MLF_Widget");
 	}
 }
 ?>
