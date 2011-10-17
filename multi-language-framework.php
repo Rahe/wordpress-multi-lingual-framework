@@ -22,9 +22,11 @@ require_once( MLF_DIR . "/inc/class.post-types.php" );
 require_once( MLF_DIR . "/inc/class.post-type.php" );
 require_once( MLF_DIR . "/inc/class.widget.php" );
 
+// User functions
 require_once( MLF_DIR . "/inc/functions.tpl.php" );
 require_once( MLF_DIR . "/inc/functions.inc.php" );
 
+// Require files on Admin
 if( is_admin() ) {
 	require_once( MLF_DIR . "/inc/class.admin.php" );
 	require_once( MLF_DIR . "/inc/class.admin.page.php" );
@@ -36,14 +38,18 @@ register_deactivation_hook(__FILE__, 'mlf_deactivate');
 add_action('plugins_loaded','mlf_init');
 function mlf_init() {
 	global $mlf;
-	
+	// Init client
 	$mlf['client'] = new MLF_Client();
 	
+	// Init admin
 	if( is_admin() ) {
+		// Global admin
 		$mlf['admin'] = new MLF_Admin();
+		
+		// Admin page
 		$mlf['admin-page'] = new MLF_Admin_Page();
 	}
 }
-
+// Init the widgets
 add_action( 'widgets_init', create_function('', 'return register_widget("MLF_Widget");') );
 ?>

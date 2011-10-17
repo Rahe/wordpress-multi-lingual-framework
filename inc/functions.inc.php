@@ -222,146 +222,170 @@ function mlf_activate() {
 	$mlf_default['windows_locale']['za'] = "Zhuang";
 	$mlf_default['windows_locale']['zh'] = "Chinese";
 	$mlf_default['windows_locale']['zu'] = "Zulu";
-
-	// Location of flags (needs trailing slash!)
-	$mlf_default['flag_location'] =  "/flags/";
 	
 	// enable the use of following languages (order=>language)
 	$mlf_config['enabled_languages'] = array(
-		'0' => 'pt',
+		'0' => 'en',
 		'1' => 'es', 
-		'2' => 'en'
+		'2' => 'pt'
 	);
 	
 	// Add defualt options
 	$mlf_config['hide_default_language'] = true;
 	
+	// Defualt language
 	$mlf_config['default_language'] =  "en";
 	
+	// Te url mode
 	$mlf_config['url_mode'] =  "path";
 	
-	$mlf_config['post_types'] =  array('post');
+	// Pot_types used
+	$mlf_config['post_types'] =  array( 'post' );
 	
+	// update the options
 	update_option( MLF_OPTION_CONFIG, $mlf_config );
 	update_option( MLF_OPTION_DEFAULT, $mlf_default );
 }
 
+/**
+ * On desactivation remove the options stating by mlf
+ * 
+ * @param $query : the query to parse
+ * @return false on failure
+ * @author Rahe
+ */
 function mlf_deactivate() {
 	global $wpdb;
 	
 	$wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE 'mlf_%'" );
 }
 
-function mlf_translationEditLink( $tId, $lang ) {
+/**
+ * Generate the edit link
+ * 
+ * @param $tId : the id of the post to get link
+ * @param $lang : the lang to get teh translation
+ * @return false on failure| string on success
+ * @author Rahe
+ */
+function mlf_translationEditLink( $tId = 0, $lang = '' ) {
+	// Get the options
 	$languages = get_option( MLF_OPTION_DEFAULT );
 	
+	// Check the curent language s a translation and id is correctly given
 	if( !isset( $languages['language_name'][$lang] ) || !isset( $tId ) || (int)$tId <= 0 )
 		return false;
 	
+	// Return the edit link
 	return '<a title="'.__( 'Edit', 'mlf' ).'" href="'.get_edit_post_link( $tId ).'"><span class="icon_edit"><span>'.__( 'Edit', 'mlf' ).'</span></span> '.$languages['language_name'][$lang].'</a></li>';
 }
 
+/**
+ * Generate the add link
+ * 
+ * @param $tId : the id of the post to get link
+ * @param $pType : the post_type to use as base translation
+ * @param $lang : the lang to get teh translation
+ * @return false on failure| string on success
+ * @author Rahe
+ */
 function mlf_translationAddLink( $tId, $pType, $lang ) {
+	// get the options
 	$languages = get_option( MLF_OPTION_DEFAULT );
 	
+	// Check language is active, check if id given is ok and ost_type exists
 	if( !isset( $languages['language_name'][$lang] ) || !isset( $tId ) || (int)$tId <= 0 || !post_type_exists( $pType ) )
 		return false;
 	
-	if( !isset( $languages['language_name'][$lang] ) )
-		return false;
-	
+	// Return the add link
 	return '<a title="'.__( 'Add', 'mlf' ).'" href="'.admin_url( 'post-new.php?post_type='.$pType.'&translation_of='.$tId ).'"><span class="icon_add"><span>'.__( 'Add', 'mlf' ).'</span> </span> '.$languages['language_name'][$lang].'</a>';
 }
 
+/**
+ * Get the translations ids from a post_type
+ * 
+ * @param $post_id : the id of the post
+ * @param $post_type : the post_type to use as base translation
+ * @return $result|array : array of translated element from this post_type sort by language 
+ * @author Rahe
+ */
 function mlf_get_tranlsations_ids( $post_id, $post_type = 'post' ) {
-	
-	if ( (int)$post_id <= 0 )
-		return false;
-	
 	global $wpdb;
 	
+	// check if given id is correct and post_type too
+	if ( (int)$post_id <= 0 || !isset( $post_type ) || empty( $post_type ) || !post_type_exists( $post_type ) )
+		return false;
+	
+	// geteh base post_type
 	$post_type_base = preg_replace( '/(.+)_t_([a-zA-Z]{2})/', "$1", $post_type );
 	
+	// get the options and set enabled ad default langauges
 	$options = get_option( MLF_OPTION_CONFIG );
 	$enabled_languages = isset( $options['enabled_languages'] )?  $options['enabled_languages'] : array() ;
 	$default_language = isset( $options['default_language'] )? $options['default_language'] : array() ;
-
+	
+	// check there is languages 
+	if( empty( $enabled_languages ) )
+		return false;
+	
 	$result = array();
 	
+	// Get the Id of the translated element for every language
 	foreach ( $enabled_languages as $lang ) {
-			
+		// Init var
 		$translation_id = false;
+		
+		// Make the post_type translated
 		$p_type = $post_type_base . '_t_' . $lang;
 		
+		// Check if defualt language
 		if ($p_type == $post_type_base . '_t_' . $default_language)
 			$p_type = $post_type_base;
-
+		
+		// Check post_type
 		if ( $post_type == $p_type ) {
 			continue;
 		}
 		
+		// Ad to the result array the ID
 		$result[$lang] = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='%s' AND meta_key='_translation_of' AND meta_value=%d ", array( $p_type, $post_id ) ) );
-		
 	}
-
+	
+	// Return the filled array
 	return $result;
 }
 
+/**
+ * Get the current language based on given post_id or global post
+ * 
+ * @param $post_id : the id of the post
+ * @return the default language on failure and current on success
+ * @author Rahe
+ */
 function mlf_get_current_language( $post_id = 0 ) {
 	global $post;
 	$thePost = $post;
 	
+	// Check given post_tid is good
 	if( (int)$post_id <= 0 )
 		$thePost = get_post( $post_id );
 	
+	// gEt default lang or option
 	$options = get_option( MLF_OPTION_CONFIG );
 	$defaultLang = $options['default_language'];
 	
+	// Explodde by prefix
 	$pType = explode( '_t_', $thePost->post_type );
 	
+	// Check isset the ptype, its defualt if nothing
 	if( !isset( $pType[1] ) )
 		return $defaultLang;
 	
+	// Return detected lanaguage if detected
 	if( isset( $pType[1] ) && in_array( $pType[1] , $options['enabled_languages'] ) )
 		return $pType[1];
 	
+	// Return defaultLanguage if nothing founded
 	return $defaultLang;
-}
-
-function mlf_single_translation() {
-	global $wp_query;
-	$default_language = mlf_get_option( 'default_language' );
-	
-	if ( is_object( $wp_query->post ) && isset( $wp_query->post->ID ) ) {
-		global $wpdb, $mlf_config;
-		
-		$mlf_config = get_option( MLF_OPTION_CONFIG );
-		
-		$post = $wp_query->post;
-		$post_type = preg_replace( '/(.+)_t_([a-zA-Z]{2})/', "$1", $post->post_type );
-		
-		if ( preg_match( '/(.+)_t_([a-zA-Z]{2})/', $post->post_type ) )
-			$post_lang = preg_replace( '/(.+)_t_([a-zA-Z]{2})/', "$2", $post->post_type );
-		else
-			$post_lang = $default_language;
-		
-		// we are seeing the language we want, no need to look for translations
-		
-		if ( !isset( $mlf_config['current_language'] ) || $post_lang == $mlf_config['current_language'] )
-			return false;
-		
-		$post_type_search = $default_language == $mlf_config['current_language'] ? $post_type : $post_type . "_t_" . $mlf_config['current_language'];
-		
-		$query = $wpdb->prepare( "SELECT * FROM $wpdb->posts JOIN $wpdb->postmeta on ID = post_id WHERE post_type = '%s' AND meta_key = '_translation_of' AND meta_value = %d", array( $post_type_search, $post->ID ) );
-		
-		$translation = $wpdb->get_row( $query );
-		
-		if ( $translation ) {
-			$wp_query->post = $translation;
-			$wp_query->posts[0] = $translation;
-		} else {
-			add_filter( 'the_content', 'mlf_add_not_available_message' );
-		}
-	}
 }
 ?>
