@@ -258,7 +258,7 @@ function mlf_translationEditLink( $tId, $lang ) {
 	if( !isset( $languages['language_name'][$lang] ) || !isset( $tId ) || (int)$tId <= 0 )
 		return false;
 	
-	return '<a title="Edit" href="'.get_edit_post_link( $tId ).'"><span class="icon_edit"><span>Edit</span></span> '.$languages['language_name'][$lang].'</a></li>';
+	return '<a title="'.__( 'Edit', 'mlf' ).'" href="'.get_edit_post_link( $tId ).'"><span class="icon_edit"><span>'.__( 'Edit', 'mlf' ).'</span></span> '.$languages['language_name'][$lang].'</a></li>';
 }
 
 function mlf_translationAddLink( $tId, $pType, $lang ) {
@@ -270,7 +270,7 @@ function mlf_translationAddLink( $tId, $pType, $lang ) {
 	if( !isset( $languages['language_name'][$lang] ) )
 		return false;
 	
-	return '<a title="Add" href="'.admin_url( 'post-new.php?post_type='.$pType.'&translation_of='.$tId ).'"><span class="icon_add"><span>Add</span> </span> '.$languages['language_name'][$lang].'</a>';
+	return '<a title="'.__( 'Add', 'mlf' ).'" href="'.admin_url( 'post-new.php?post_type='.$pType.'&translation_of='.$tId ).'"><span class="icon_add"><span>'.__( 'Add', 'mlf' ).'</span> </span> '.$languages['language_name'][$lang].'</a>';
 }
 
 function mlf_get_tranlsations_ids( $post_id, $post_type = 'post' ) {
@@ -352,8 +352,7 @@ function mlf_single_translation() {
 		
 		$post_type_search = $default_language == $mlf_config['current_language'] ? $post_type : $post_type . "_t_" . $mlf_config['current_language'];
 		
-		$query = $wpdb->prepare( "select * from $wpdb->posts join $wpdb->postmeta on ID = post_id WHERE post_type = '%s' 
-				AND meta_key = '_translation_of' AND meta_value = %d", array( $post_type_search, $post->ID ) );
+		$query = $wpdb->prepare( "SELECT * FROM $wpdb->posts JOIN $wpdb->postmeta on ID = post_id WHERE post_type = '%s' AND meta_key = '_translation_of' AND meta_value = %d", array( $post_type_search, $post->ID ) );
 		
 		$translation = $wpdb->get_row( $query );
 		

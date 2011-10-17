@@ -6,14 +6,13 @@ class MLF_Rewrite {
 	}
 	
 	function parseQuery( $query ) {
-		
 		// Check if admin
 		if( is_admin() )
-			return;
-		
-		if( !isset( $query->query_vars['post_type'] ) )
 			return false;
 		
+		if( !isset( $query->query_vars['post_type'] ) || !is_singular() || !is_archive() )
+			return false;
+
 		// Get the options
 		$options = get_option( MLF_OPTION_CONFIG );
 		
@@ -28,16 +27,22 @@ class MLF_Rewrite {
 		add_action( 'template_redirect', array( &$this, 'templateRedirect' ) );
 	}
 	
-	function templateRedirect( $templates = array() ) {
+	function templateRedirect() {
 		global $wp_query;
+		
+		$templates = array();
 		
 		// Get post_type and language
 		$els = explode( '_t_', $wp_query->query_vars['post_type'] );
 		
+		$slug = 'single';
+		if( is_archive() )
+			$slug = 'archive';
+
 		// Make the single templates
-		$templates[] = 'single-'.$els[0].'-'.$els[1].'.php' ;
-		$templates[] = 'single-'.$els[0].'.php' ;
-		$templates[] = 'single.php';
+		$templates[] = $slug.'-'.$els[0].'-'.$els[1].'.php' ;
+		$templates[] = $slug.'-'.$els[0].'.php' ;
+		$templates[] = $slug.'.php';
 		
 		// Add the templates to the current
 		locate_template( $templates, true );

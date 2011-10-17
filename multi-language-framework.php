@@ -18,13 +18,17 @@ define( 'MLF_OPTION_DEFAULT', 'mlf_default' );
 require_once( MLF_DIR . "/inc/class.rewrite.php" );
 require_once( MLF_DIR . "/inc/class.widget.php" );
 require_once( MLF_DIR . "/inc/class.client.php" );
-require_once( MLF_DIR . "/inc/class.admin.php" );
-require_once( MLF_DIR . "/inc/class.admin.page.php" );
 require_once( MLF_DIR . "/inc/class.post-types.php" );
 require_once( MLF_DIR . "/inc/class.post-type.php" );
 require_once( MLF_DIR . "/inc/class.widget.php" );
+
 require_once( MLF_DIR . "/inc/functions.tpl.php" );
 require_once( MLF_DIR . "/inc/functions.inc.php" );
+
+if( is_admin() ) {
+	require_once( MLF_DIR . "/inc/class.admin.php" );
+	require_once( MLF_DIR . "/inc/class.admin.page.php" );
+}
 
 register_activation_hook(__FILE__, 'mlf_activate');
 register_deactivation_hook(__FILE__, 'mlf_deactivate');
@@ -33,15 +37,13 @@ add_action('plugins_loaded','mlf_init');
 function mlf_init() {
 	global $mlf;
 	
-	$mlf['rewrite'] = new MLF_Rewrite();
 	$mlf['client'] = new MLF_Client();
 	
 	if( is_admin() ) {
 		$mlf['admin'] = new MLF_Admin();
 		$mlf['admin-page'] = new MLF_Admin_Page();
 	}
-	
-	$mlf['post-types'] = new MLF_PostTypes();
 }
 
+add_action( 'widgets_init', create_function('', 'return register_widget("MLF_Widget");') );
 ?>

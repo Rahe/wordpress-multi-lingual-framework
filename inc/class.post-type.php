@@ -17,7 +17,7 @@ class MLF_PostType extends MLF_PostTypes {
 	}
 	
 	function init() {
-		global $wp_post_types,$_wp_post_type_features;
+		global $wp_post_types,$_wp_post_type_features,$mlf;
 		
 		$language_name = $this->_options['language_name'];
 		
@@ -53,8 +53,10 @@ class MLF_PostType extends MLF_PostTypes {
 		//Register the post_type
 		register_post_type( $this->_post_type.'_t_'.$this->_lang, $args );
 		
-		// Add the fileters
-		add_filter( 'manage_'.$this->_post_type.'_posts_columns', array( &$this ,'addColumnContent' ), 10, 2 );
-		add_action( 'save_'.$this->_post_type, array( &$this , 'postSave' ) );
+		if( is_admin() ) {
+			// Add the filters
+			add_filter( 'manage_'.$this->_post_type.'_posts_columns', array( $mlf['admin'],'addColumnContent' ), 10, 2 );
+			add_action( 'save_'.$this->_post_type, array( $mlf['admin'], 'postSave' ) );
+		}
 	}
 }

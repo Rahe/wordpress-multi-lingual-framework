@@ -1,12 +1,13 @@
 <?php
 class MLF_Client{
-	
 	function __construct() {
-		add_action( 'widgets_init', array( &$this, 'registerWidget' ) );
-	}
-	
-	function registerWidget() {
-		register_widget("MLF_Widget");
+		global $mlf;
+
+		// Init the post_types
+		$mlf['post-types'] = new MLF_PostTypes();
+
+		// init rewriting
+		$mlf['rewrite'] = new MLF_Rewrite();
 	}
 }
 ?>
