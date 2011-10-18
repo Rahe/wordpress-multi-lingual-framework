@@ -378,7 +378,7 @@ function mlf_get_current_language( $post_id = 0 ) {
  * @return array with all the slugs of post_types
  * @author Rahe
  */
-function mlf_get_registered_post_types() {
+function mlf_get_registered_post_types( $p_type ) {
 	// get the option
 	$options = get_option( MLF_OPTION_CONFIG );
 	
@@ -395,6 +395,9 @@ function mlf_get_registered_post_types() {
 		foreach( $options['enabled_languages'] as $lang ) {
 			// If we are on the defualt language, skip this one
 			if( $lang == $options['default_language'] )
+				continue;
+			
+			if( isset( $p_type ) && !empty( $p_type ) && $p_type != $post_type )
 				continue;
 			
 			// Add the language
