@@ -10,8 +10,8 @@ class MLF_Admin extends MLF_PostTypes {
 		add_action( 'admin_enqueue_scripts', array( &$this, 'addRessources' ) );
 		
 		// Adds the Translation Column to the Edit screen
-		add_filter( "manage_posts_columns", array( &$this ,'addColumn' ) );
-		add_filter( "manage_pages_columns", array( &$this ,'addColumn' ) );
+		add_filter( "manage_posts_columns", array( &$this ,'addColumn' ), 10, 2 );
+		add_filter( "manage_pages_columns", array( &$this ,'addColumn' ), 10, 2 );
 		
 		// Add the content of the columns
 		add_action( "manage_posts_custom_column", array( &$this ,'addColumnContent' ) , 10, 2 );
@@ -47,9 +47,10 @@ class MLF_Admin extends MLF_PostTypes {
 	 * @return $new_columns|$default : the modified (or not) columns indexes
 	 * @author Rahe
 	 */
-	function addColumn( $defaults ) {
+	function addColumn( $defaults, $p_type = '' ) {
+		
 		// If there is registered languages and not in trash
-		if( count( $this->_options['enabled_languages'] ) <= 1 || get_query_var( 'post_status' ) == 'trash' ){
+		if( count( $this->_options['enabled_languages'] ) <= 1 || get_query_var( 'post_status' ) == 'trash' || $p_type != 'page' || ( !empty( $p_type ) && !in_array( $p_type, $this->_options['enabled_languages'] ) ) ){
 			return $defaults;
 		}
 			
