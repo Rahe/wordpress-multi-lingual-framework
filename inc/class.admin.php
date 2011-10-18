@@ -49,8 +49,12 @@ class MLF_Admin extends MLF_PostTypes {
 	 */
 	function addColumn( $defaults, $p_type = '' ) {
 		
+		// If no post type, we are on page
+		if( !isset( $p_type ) || empty( $p_type ) )
+			$p_type = 'page';
+		
 		// If there is registered languages and not in trash
-		if( count( $this->_options['enabled_languages'] ) <= 1 || get_query_var( 'post_status' ) == 'trash' || $p_type != 'page' || ( !empty( $p_type ) && !in_array( $p_type, $this->_options['enabled_languages'] ) ) ){
+		if( count( $this->_options['enabled_languages'] ) <= 1 || get_query_var( 'post_status' ) == 'trash' || !in_array( $p_type, array_merge( mlf_get_registered_post_types(), $this->_options['post_types'] ) ) ){
 			return $defaults;
 		}
 			
