@@ -41,9 +41,9 @@ class MLF_Admin_Page{
 					<?php endforeach; ?>
 					</select>
 				<h3><?php _e( 'URL Mode', 'mlf' ); ?></h3>
-					<input type="radio" name="mlf_config[url_mode]" value="subdomain" <?php if ( 'subdomain' == $mlf_config['url_mode']) echo 'checked'; ?> > <?php _e( 'subdomain - es.mysite.com', 'mlf' ); ?>  UNTESTED<br />
-					<input type="radio" name="mlf_config[url_mode]" value="path" <?php if ( 'path' == $mlf_config['url_mode']) echo 'checked'; ?> > <?php _e( 'subdirectory - mysite.com/es', 'mlf' ); ?> <br />
-					<input type="radio" name="mlf_config[url_mode]" value="querystring" <?php if ( 'querystring' == $mlf_config['url_mode']) echo 'checked'; ?> > <?php _e( 'query string - mysite.com/?lang=es', 'mlf' ); ?> UNTESTED<br />
+					<input type="radio" name="mlf_config[url_mode]" value="subdomain" <?php if ( 'subdomain' == $mlf_config['url_mode']) echo 'checked'; ?> /> <?php _e( 'subdomain - es.mysite.com', 'mlf' ); ?>  UNTESTED<br />
+					<input type="radio" name="mlf_config[url_mode]" value="path" <?php if ( 'path' == $mlf_config['url_mode']) echo 'checked'; ?> /> <?php _e( 'subdirectory - mysite.com/es', 'mlf' ); ?> <br />
+					<input type="radio" name="mlf_config[url_mode]" value="querystring" <?php if ( 'querystring' == $mlf_config['url_mode']) echo 'checked'; ?> /> <?php _e( 'query string - mysite.com/?lang=es', 'mlf' ); ?> UNTESTED<br />
 				
 				<h3><?php _e( 'Post types that will be translated', 'mlf' ); ?></h3>
 					<div>
@@ -52,9 +52,9 @@ class MLF_Admin_Page{
 						if ( preg_match( '/_t_/', $name ) ) 
 							continue; 
 					?>
-						<input type="checkbox" name="mlf_config[post_types][]" value="<?php esc_attr_e( $name ); ?>" <?php checked( in_array( $name, $mlf_config['post_types'] ), true ); ?> > <?php echo $ptype->label; ?> <br />
-					</div>
+						<input type="checkbox" name="mlf_config[post_types][]" value="<?php esc_attr_e( $name ); ?>" <?php checked( in_array( $name, $mlf_config['post_types'] ), true ); ?> /> <?php echo $ptype->label; ?> <br />
 					<?php endforeach; ?>
+					</div>
 				<h3><?php _e( 'Languages', 'mlf' ); ?></h3>
 					<table class="wp-list-table widefat posts">
 						<thead>
@@ -79,11 +79,11 @@ class MLF_Admin_Page{
 					?>
 						<tr>
 							<td>
-								<input type="checkbox" name="mlf_config[enabled_languages][]" value="<?php echo $lang; ?>" <?php checked( in_array( $lang, $mlf_config['enabled_languages'] ), true ); ?> >
+								<input type="checkbox" name="mlf_config[enabled_languages][]" value="<?php echo $lang; ?>" <?php checked( in_array( $lang, $mlf_config['enabled_languages'] ), true ); ?> />
 							</td>
 							<td><?php echo $name; ?></td>
-							<td><input type="text" name="mlf_config[labels][not_available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $not_avaible ); ?>"></td>
-							<td><input type="text" name="mlf_config[labels][available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $avaible ); ?>"></td>
+							<td><input type="text" name="mlf_config[labels][not_available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $not_avaible ); ?>" /></td>
+							<td><input type="text" name="mlf_config[labels][available][<?php esc_attr_e( $lang ); ?>]" value="<?php esc_html_e( $avaible ); ?>" /></td>
 						</tr>
 					<?php endforeach; ?>
 					</table>
