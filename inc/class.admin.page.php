@@ -28,6 +28,7 @@ class MLF_Admin_Page{
 		
 		$mlf_config['enabled_languages'] = isset( $mlf_config['enabled_languages'] ) && !empty( $mlf_config['enabled_languages'] )? $mlf_config['enabled_languages'] : array() ;
 		$mlf_config['default_language'] = isset( $mlf_config['default_language'] )? $mlf_config['default_language'] : '' ;
+		$mlf_config['post_types'] = isset( $mlf_config['post_types'] )? $mlf_config['post_types'] : array() ;
 		?>
 		<div class="wrap">
 			<form method="post" action="options.php">

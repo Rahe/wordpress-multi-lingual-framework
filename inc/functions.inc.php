@@ -26,7 +26,7 @@ function mlf_activate() {
 	$mlf_default['language_name']['de'] = "Deutsch";
 	$mlf_default['language_name']['en'] = "English";
 	$mlf_default['language_name']['zh'] = "中文";
-	$mlf_default['language_name']['fi'] = "suomi";
+	$mlf_default['language_name']['fi'] = "Suomi";
 	$mlf_default['language_name']['fr'] = "Français";
 	$mlf_default['language_name']['nl'] = "Nederlands";
 	$mlf_default['language_name']['se'] = "Svenska";
@@ -38,24 +38,6 @@ function mlf_activate() {
 	$mlf_default['language_name']['vi'] = "Tiếng Việt";
 	$mlf_default['language_name']['ar'] = "العربية";
 	$mlf_default['language_name']['pt'] = "Português";
-
-	// Flag images configuration
-	// Look in /flags/ directory for a huge list of flags for usage
-	$mlf_default['flag']['en'] = 'gb.png';
-	$mlf_default['flag']['de'] = 'de.png';
-	$mlf_default['flag']['zh'] = 'cn.png';
-	$mlf_default['flag']['fi'] = 'fi.png';
-	$mlf_default['flag']['fr'] = 'fr.png';
-	$mlf_default['flag']['nl'] = 'nl.png';
-	$mlf_default['flag']['se'] = 'se.png';
-	$mlf_default['flag']['it'] = 'it.png';
-	$mlf_default['flag']['ro'] = 'ro.png';
-	$mlf_default['flag']['hu'] = 'hu.png';
-	$mlf_default['flag']['ja'] = 'jp.png';
-	$mlf_default['flag']['es'] = 'es.png';
-	$mlf_default['flag']['vi'] = 'vn.png';
-	$mlf_default['flag']['ar'] = 'arle.png';
-	$mlf_default['flag']['pt'] = 'br.png';
 
 	// Full country names as locales for Windows systems
 	$mlf_default['windows_locale']['aa'] = "Afar";
@@ -387,5 +369,40 @@ function mlf_get_current_language( $post_id = 0 ) {
 	
 	// Return defaultLanguage if nothing founded
 	return $defaultLang;
+}
+
+/**
+ * Get all the registered translated post_types
+ * 
+ * @param void
+ * @return array with all the slugs of post_types
+ * @author Rahe
+ */
+function mlf_get_registered_post_types() {
+	// get the option
+	$options = get_option( MLF_OPTION_CONFIG );
+	
+	// Get the array
+	$out = array();
+	
+	// Check options filled
+	if( !isset( $options['default_language'] ) || empty( $options['default_language'] ) || !isset( $options['enabled_languages'] ) || empty( $options['enabled_languages'] ) || !isset( $options['post_types'] ) || empty( $options['post_types'] ) )
+		return $out;
+	
+	// Make all the registered post_types
+	foreach( $options['post_types'] as $post_type ) {
+		// Make all the languages
+		foreach( $options['enabled_languages'] as $lang ) {
+			// If we are on the defualt language, skip this one
+			if( $lang == $options['default_language'] )
+				continue;
+			
+			// Add the language
+			$out[] = $post_type.'_t_'.$lang;
+		}
+	}
+	
+	// Return the array filled
+	return $out;
 }
 ?>
