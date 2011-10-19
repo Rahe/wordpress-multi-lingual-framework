@@ -89,8 +89,8 @@ class MLF_Admin extends MLF_PostTypes {
 			
 			// Ad meta boxes for all the other languages and post_type translated
 			foreach ( $this->_options['enabled_languages'] as $lang ) {
-				add_meta_box( 'post_translations',		__( 'Post Translations', 'mlf' ), 		array( &$this, 'translationInnerBox' ), 	$p . '_t_' . $lang, 'side' );
-				add_meta_box( 'mlf_other_version_id',	__( 'Translations content', 'mlf' ), 	array( &$this, 'otherTranslationsTabs' ), 	$p . '_t_' . $lang, 'normal', 'high' );
+				add_meta_box( 'post_translations',		__( 'Post Translations', 'mlf' ), 		array( &$this, 'translationInnerBox' ), 	sanitize_key( $p . '_t_' . $lang ), 'side' );
+				add_meta_box( 'mlf_other_version_id',	__( 'Translations content', 'mlf' ), 	array( &$this, 'otherTranslationsTabs' ), 	sanitize_key( $p . '_t_' . $lang ), 'normal', 'high' );
 			}
 		}
 	}
@@ -120,7 +120,7 @@ class MLF_Admin extends MLF_PostTypes {
 			$post_type = $_POST['post_type'];
 		
 		// Get the base post_type ( without special prefix)
-		$post_type_base = preg_replace( '/^(\S+)_t_\S{2}$/', "$1", $post_type );
+		$post_type_base = current( explode( '_t_', $post_type ) );
 		
 		// Display the language list
 		echo '<ul class="languages-list">';
@@ -129,10 +129,10 @@ class MLF_Admin extends MLF_PostTypes {
 			$translation_id = 0;
 			
 			// Get the translated post_type
-			$p_type = $post_type_base . '_t_' . $lang;
+			$p_type = sanitize_key( $post_type_base . '_t_' . $lang );
 			
 			// Check not same
-			if ( $p_type == $post_type_base . '_t_' . $this->_options['default_language'] )
+			if ( $p_type == sanitize_key( $post_type_base . '_t_' . $this->_options['default_language'] ) )
 				$p_type = $post_type_base;
 			
 			// Check not same
@@ -173,8 +173,8 @@ class MLF_Admin extends MLF_PostTypes {
 			$id = $post->ID;
 		}
 		
-		// get the base post_type
-		$post_type_base = preg_replace( '/^(\S+)_t_\S{2}$/', "$1", $post->post_type );
+		// Get the base post_type ( without special prefix)
+		$post_type_base = current( explode( '_t_', $post->post_type ) );
 		
 		// if no translation founded, so this is a new post, check if not basic post_type
 		if( empty( $translation_of ) && !in_array( $post->post_type, $this->_options['post_types'] ) ) {
@@ -212,7 +212,7 @@ class MLF_Admin extends MLF_PostTypes {
 			}
 			// Get thecurrent post_type
 			$post_type = $post->post_type;
-			
+
 			// display the list for all tge langauges for add/edit translation
 			echo '<ul>';
 			foreach ( $this->_options['enabled_languages'] as $lang ) {
@@ -220,10 +220,10 @@ class MLF_Admin extends MLF_PostTypes {
 				$translation_id = 0;
 				
 				// Get modified post_type
-				$p_type = $post_type_base . '_t_' . $lang;
+				$p_type = sanitize_key( $post_type_base . '_t_' . $lang );
 				
 				// Check post_type base language
-				if ( $p_type == $post_type_base . '_t_' . $this->_options['default_language'] )
+				if ( $p_type == sanitize_key( $post_type_base . '_t_' . $this->_options['default_language'] ) )
 					$p_type = $post_type_base;
 				
 				// If same ptype do not display the link edit/add
@@ -297,10 +297,17 @@ class MLF_Admin extends MLF_PostTypes {
 				$posts->the_post();
 				
 				// If this is an translation, then get the lang from the post_type
-				if ( strpos( $post->post_type, '_t_' ) !== false )
-					$lang = preg_replace( '/^\S+_t_(\S{2})$/', "$1", $post->post_type );
-				else
+				if ( strpos( $post->post_type, '_t_' ) !== false ) {
+					$lang = explode( '_t_', $post->post_type );
+					$lang = $lang[1];
+					if( strpos( $lang, '_' ) ) {
+						$lang = explode( '_', $lang );
+						$lang[1] = strtoupper( $lang[1] );
+						$lang = implode( '_' , $lang );
+					}
+				} else {
 					$lang = $this->_options['default_language'];
+				}
 				
 				// If we are on the same post as current, do not diplay the content
 				if( $original == get_the_ID() )
@@ -309,7 +316,6 @@ class MLF_Admin extends MLF_PostTypes {
 				// Make title and content
 				$translation_version[$lang] = '<h2>' . get_the_title() . '</h2>' . get_the_content();
 			}
-			
 			// If translation available, display tabs
 			if( !empty( $translation_version ) ) :
 			?>
@@ -318,7 +324,7 @@ class MLF_Admin extends MLF_PostTypes {
 					<?php
 						foreach ( $translation_version as $lang => $text ) {
 							// Get the language name
-							$title = $this->_options['language_name'][$lang];
+							$title = isset( $this->_options['language_name'][$lang] )? $this->_options['language_name'][$lang] : '';
 							
 							// if original langague,display it
 							if( $lang == $this->_options['default_language'] )
@@ -401,11 +407,11 @@ class MLF_Admin extends MLF_PostTypes {
 		global $wpdb;
 		
 		// Check params
-		if( !isset( $tId ) || (int)$tId <= 0 || !post_type_exists( $pType ) || !isset( $lang ) || empty( $lang ) )
+		if( !isset( $tId ) || (int)$tId <= 0 || !post_type_exists( sanitize_key( $pType ) ) || !isset( $lang ) || empty( $lang ) )
 			return false;
 
 		// Make the edit/add Links
-		if ( $translation_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='%s' AND meta_key='_translation_of' AND meta_value=%d", array( $pType, $tId ) ) ) ) {	
+		if ( $translation_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts p JOIN $wpdb->postmeta pm ON post_id = p.ID WHERE post_status <> 'trash' AND post_type='%s' AND meta_key='_translation_of' AND meta_value=%d", array( $pType, $tId ) ) ) ) {
 			echo $before.$this->theTranslationEditLink( $translation_id, $lang ).$after;
 		} elseif( !isset( $translation_id ) && $displayAdd == true ) {
 			echo $before.$this->theTranslationAddLink( $tId, $pType, $lang ).$after;
