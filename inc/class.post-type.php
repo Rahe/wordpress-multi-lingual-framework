@@ -78,7 +78,6 @@ class MLF_PostType extends MLF_PostTypes {
 		// if admin add save and columns methods
 		if( is_admin() ) {
 			// Add the filters and actions
-			add_filter( 'manage_'.$this->_post_type.'_posts_custom_column', array( $mlf['admin'],'addColumnContent' ), 10, 2 );
 			add_action( 'save_post', array( $mlf['admin'], 'postSave' ) );
 		}
 	}

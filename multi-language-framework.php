@@ -4,12 +4,12 @@ Plugin Name: Multi Language Framework
 Plugin URI: https://github.com/Rahe/wordpress-multi-lingual-framework
 Description: Handles creation of multilingual content.
 Author: Rahe
-Version: 0.3
+Version: 0.4
 
 Originally from BIREME, LeoGermani
 */
 
-define( 'MLF_VERSION', '0.3' );
+define( 'MLF_VERSION', '0.4' );
 define( 'MLF_PLUGIN_URL', plugins_url('/', __FILE__) );
 define( 'MLF_DIR', dirname(__FILE__) );
 define( 'MLF_OPTION_CONFIG', 'mlf_config' );

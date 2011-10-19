@@ -4,7 +4,7 @@ Donate link: http://reddes.bvsalud.org/projects/multi-language-framework/
 Tags: multilanguage, translation, cms
 Requires at least: 3.0
 Tested up to: 3.0.1
-Stable tag: Not available
+Stable tag: 0.4
 
 Handles creation of multilingual content.
 
